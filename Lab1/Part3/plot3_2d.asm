@@ -1,11 +1,11 @@
-.eqv VGA 0xFF000000		#ENDERE«O DA VGA
+.eqv VGA 0xFF000000		#ENDERE√áO DA VGA
 .eqv X $f0			#DEFINE X = $F20
 .eqv Y $f12			#DEFINE Y = $F21
 .eqv ZERO $f18
 .eqv NUMx 320			#DEFINE NUMx = 320
 .eqv NUMy 129			#DEFINE NUMy = 240
 
-.data				#DECLARA VARI¡VEIS
+.data				#DECLARA VARI√ÅVEIS
 LINF:   .float -2.0
 LSUP:   .float 3.0
 NUMX:  .float 320.0
@@ -23,20 +23,28 @@ MEIOUM:	.float 1.5
 	l.s $f25, LSUP		#f25 = LSUP
 	l.s $f4, NUMX		#f4 = NUMX
 	l.s $f5, NUMY 		#f5 = NUMY
-	sub.s $f26, $f25, $f24	#ResoluÁ„o de X
-	div.s $f26, $f26, $f4	#ResoluÁ„o de X
-	j LIMITS		#Calcula o m·ximo e o mÌnimo real da funÁ„o
-L2:	sub.s $f30, $f31, $f30	#ResoluÁ„o de Y
-	div.s $f30, $f30, $f5	#ResoluÁ„o de Y
+	sub.s $f26, $f25, $f24	#Resolu√ß√£o de X
+	div.s $f26, $f26, $f4	#Resolu√ß√£o de X
+	j LIMITS		#Calcula o m√°ximo e o m√≠nimo real da fun√ß√£o
+L2:	c.le.s $f18, $f30	#Verifica se Ymin √© menor que zero
+	bc1t Y0 		
+	sub.s $f30, $f31, $f30	#Resolu√ß√£o de Y
+	div.s $f30, $f30, $f5	#Resolu√ß√£o de Y
+	j PRINT			#PROCEDIMENTO PRINT
+	
+Y0:	mul $t0, $t0, $zero	#Reajusta o offset para Y come√ßar em 239, 0
+	addi $t0, $t0, 239
+	sub.s $f30, $f31, $f30	#Resolu√ß√£o de Y
+	div.s $f30, $f30, $f5	#Resolu√ß√£o de Y
 	j PRINT			#PROCEDIMENTO PRINT
 	
 EXIT:	li $v0,10		#Encerra o programa
 	syscall
 	
-#LETRA D	
+#LETRA b
 FUNCAO:	c.eq.s X, $f27		#Se X atual for 1.5, ignore o plot
 	bc1t E1			
-	mov.s $f19, $f18	#Reseta os registradores utilizados temporariamente para calcular a funÁ„o
+	mov.s $f19, $f18	#Reseta os registradores utilizados temporariamente para calcular a fun√ß√£o
 	mov.s $f20, $f18
 	mov.s $f21, $f18
 	mov.s $f22, $f18
@@ -44,7 +52,7 @@ FUNCAO:	c.eq.s X, $f27		#Se X atual for 1.5, ignore o plot
 	mul.s $f19, $f19, $f19	#(X+1)^2
 	sub.s $f20, X, $f11	#(X-1)
 	sub.s $f21, X, $f11	#(X-2)
-	sub.s $f21, $f21, $f11	#tambÈm (X-2)
+	sub.s $f21, $f21, $f11	#tamb√©m (X-2)
 	sub.s $f22, X, $f27	#(X-1.5)
 	mul.s Y, $f19, $f20	#(X+1)^2 *(X-1)
 	mul.s Y, Y, $f21	#(X+1)^2 *(X-1)*(X-2)
@@ -54,80 +62,81 @@ E1:	li $t5, 0xFF		#Define a cor branca, caso seja 1.5
 	jr $ra			#Retorna pra PC+4 (caso X seja 1.5)
 	
 PRINT:	mov.s X, $f24		#Reseta X
-	c.eq.s X, $f25		#CondiÁıes de Loop
+	mul $t2, $t2, 0
+	c.eq.s X, $f25		#Condi√ß√µes de Loop
 	bc1f PLOT		#Se X != LSUP, executa plot	
 	j EXIT
 	
-PLOT:	la $s0, VGA		#s0 = endereÁo da VGA
+PLOT:	la $s0, VGA		#s0 = endere√ßo da VGA
 L1:	li $t5,0x7		#Cor vermelha
-	jal FUNCAO		#Calcula a funÁ„o
-	div.s Y, Y, $f30	#Ajusta a resoluÁ„o de Y
-	c.lt.s Y, $f18		#Se Y<0, v· para L3
+	jal FUNCAO		#Calcula a fun√ß√£o
+	div.s Y, Y, $f30	#Ajusta a resolu√ß√£o de Y
+	c.lt.s Y, $f18		#Se Y<0, v√° para L3
 	bc1t L3
 	cvt.w.s Y, Y		#Converte Y de float para word
 	mfc1 $t4, Y		#Copia Y para t4
-	sub $t4, $t0, $t4	#Ajusta Y para comeÁar do (129,0), n„o do (0,0)
+	sub $t4, $t0, $t4	#Ajusta Y para come√ßar do (129,0) ou (239,0), n√£o do (0,0)
 	mul $t4, $t4, $t1	#320*Y
 	add $t4, $t4, $t2	# +X
-	slti $t7, $t4, 0	#N„o pintar caso o byte calculado seja anterior ao inicio de 0xFF000000
+	slti $t7, $t4, 0	#N√£o pintar caso o byte calculado seja anterior ao inicio de 0xFF000000
 	beqz $t7, DRAW		
-	c.eq.s X, $f25		#CondiÁıes de Loop
+	c.le.s $f25, X		#Condi√ß√µes de Loop
 	bc1t EXIT
 	addi $t2, $t2, 1	#t2 = t2 + 1
-	add.s X, X, $f26	#X = X + ResoluÁ„o em X
+	add.s X, X, $f26	#X = X + Resolu√ß√£o em X
 	j L1
 
-#O meio da tela È o eixo X, ou seja Y =0. Caso Y seja menor que zero, o ajuste do offset È (129 + mÛdulo de Y*ResoluÁ„o_Y)(L3)
-#Caso Y seja maior que zero, o ajuste de offset È 129 - (Y*resoluÁ„o de Y)
+#O meio da tela √© o eixo X, ou seja Y =0. Caso Y seja menor que zero, o ajuste do offset √© (129 + m√≥dulo de Y*Resolu√ß√£o_Y)(L3)
+#Caso Y seja maior que zero, o ajuste de offset √© 129 - (Y*resolu√ß√£o de Y)
 
-L3:	abs.s Y, Y		#Tira o mÛdulo de Y
+L3:	abs.s Y, Y		#Tira o m√≥dulo de Y
 	cvt.w.s Y, Y		#Converte Y de float para word
 	mfc1 $t4, Y		#Copia Y para t4
-	add $t4, $t0, $t4	#Ajusta Y para comeÁar do (129,0), n„o do (0,0)
+	add $t4, $t0, $t4	#Ajusta Y para come√ßar do (129,0) ou (239,0), n√£o do (0,0)
 	mul $t4, $t4, $t1	#320*Y
 	add $t4, $t4, $t2	# +X
-	slti $t7, $t4, 0	#N„o pintar caso o byte calculado seja anterior ao inicio de 0xFF000000
+	slti $t7, $t4, 0	#N√£o pintar caso o byte calculado seja anterior ao inicio de 0xFF000000
 	beqz $t7, DRAW
-	c.eq.s X, $f25		#CondiÁıes de Loop
+	c.le.s $f25, X		#Condi√ß√µes de Loop
 	bc1t EXIT
 	addi $t2, $t2, 1	#t2 = t2 + 1
-	add.s X, X, $f26	#X = X + ResoluÁ„o em X
+	add.s X, X, $f26	#X = X + Resolu√ß√£o em X
 	j L1
 	
-DRAW:	add $t4, $s0, $t4	#Desenha o gr·fico
+DRAW:	add $t4, $s0, $t4	#Desenha o gr√°fico
 	sb $t5, 0($t4)
-	c.eq.s X, $f25		#CondiÁıes de Loop
+	c.le.s $f25, X		#Condi√ß√µes de Loop
 	bc1t EXIT
 	addi $t2, $t2, 1	#t2 = t2 + 1
-	add.s X, X, $f26	#X = X + ResoluÁ„o em X
+	add.s X, X, $f26	#X = X + Resolu√ß√£o em X
 	j L1
 
 	
 LIMITS:	add.s X, $f24, X	# X = X + Linf
 	jal FUNCAO		#Calcula a funcao
-	mtc1 $zero, X		#Certifica que X È 0
+	mtc1 $zero, X		#Certifica que X √© 0
 	add.s $f30, ZERO, Y	#Calcula o primeiro YMIN
 	add.s $f31, ZERO, Y	#Calcula o primeiro YMAX
 	
 	add.s X, $f24, X	# X = X + Linf
-LOOP:	jal FUNCAO		#Calcula a funÁ„o
+LOOP:	jal FUNCAO		#Calcula a fun√ß√£o
 	c.le.s Y, $f30		#se Y<=YMIN 
 	bc1t YMIN
 	c.le.s $f31, Y		#se YMAX<= Y
 	bc1t YMAX
-	c.eq.s X, $f25		#CondiÁıes de Loop
+	c.le.s $f25, X		#Condi√ß√µes de Loop
 	bc1t L2
 	add.s X, X, $f26
 	j LOOP
 	
 YMIN:	mov.s $f30, Y		#Y = YMIN
-	c.eq.s X, $f25		#CondiÁıes de Loop
+	c.le.s $f25, X		#Condi√ß√µes de Loop
 	bc1t L2
 	add.s X, X, $f26
 	j LOOP
 
 YMAX:	mov.s $f31, Y		#Y = YMAX
-	c.eq.s X, $f25		#CondiÁıes de Loop
+	c.le.s $f25, X		#Condi√ß√µes de Loop
 	bc1t L2
 	add.s X, X, $f26
 	j LOOP	
