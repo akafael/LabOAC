@@ -45,9 +45,9 @@ main:
 	la	$16,v
 	
 	sw	$31,20($sp)
+	la	$4, v
 	jal	show
 	#addiu	$4,$16,%lo(v)
-	la	$4,v
 
 	#addiu	$4,$16,%lo(v)
 	la	$4,v
@@ -59,10 +59,15 @@ main:
 	lw	$31,20($sp)
 	li	$5,10			# 0xa
 	lw	$16,16($sp)
-	j	show
+	jal	show 	# alterado de j para jal
+	nop		#acrescentado
+	#addiu	$sp,$sp,24
+	#mars
+	#j	$31
+	li 	$2, 10
+	syscall	
+	#mars
 	
-	addiu	$sp,$sp,24
-
 	.set	macro
 	.set	reorder
 	.end	main
@@ -97,7 +102,7 @@ show:
 .L3:
 	lw	$5,0($16)
 	addiu	$17,$17,1
-	move	$4,$19				#segundo argumento estava $19
+	move	$4,$5				#segundo argumento estava $19
 	#jal	printf
 	li	$v0, 1
 	syscall
@@ -113,7 +118,7 @@ show:
 	lw	$16,20($sp)
 	#j	putchar
 	la	$4,.LC0
-	li	$v0, 4
+	li	$2, 4
 	syscall
 	addiu	$sp,$sp,40
 
@@ -148,6 +153,7 @@ swap:
 	lw	$3,0($4)
 	sw	$3,0($5)
 	jr	$31
+	nop
 	sw	$2,0($4)
 
 	.set	macro
