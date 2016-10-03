@@ -3,7 +3,7 @@
 .eqv Y $f12			#DEFINE Y = $F21
 .eqv ZERO $f18
 .eqv NUMx 320			#DEFINE NUMx = 320
-.eqv NUMy 129			#DEFINE NUMy = 240
+.eqv NUMy 119			#DEFINE NUMy = 240
 
 .data				#DECLARA VARIÁVEIS
 LINF:   .float -2.0
@@ -26,14 +26,21 @@ MEIOUM:	.float 1.5
 	sub.s $f26, $f25, $f24	#Resolução de X
 	div.s $f26, $f26, $f4	#Resolução de X
 	j LIMITS		#Calcula o máximo e o mínimo real da função
-L2:	c.le.s $f18, $f30	#Verifica se Ymin é menor que zero
-	bc1t Y0 		
+L2:	c.le.s $f18, $f30	#Verifica se Ymin é maior ou igual a zero (Imagem completamente positiva)
+	bc1t Y01
+	c.le.s $f31, $f18	#Verifica se Ymax é menor ou igual a zero (Imagem completamente negativa)
+	bc1t Y02
 	sub.s $f30, $f31, $f30	#Resolução de Y
 	div.s $f30, $f30, $f5	#Resolução de Y
 	j PRINT			#PROCEDIMENTO PRINT
 	
-Y0:	mul $t0, $t0, $zero	#Reajusta o offset para Y começar em 239, 0
+Y01:	mul $t0, $t0, $zero	#Reajusta o offset para Y começar em 239, 0
 	addi $t0, $t0, 239
+	sub.s $f30, $f31, $f30	#Resolução de Y
+	div.s $f30, $f30, $f5	#Resolução de Y
+	j PRINT			#PROCEDIMENTO PRINT
+	
+Y02:	mul $t0, $t0, $zero	#Reajusta o offset para Y começar em 0, 0
 	sub.s $f30, $f31, $f30	#Resolução de Y
 	div.s $f30, $f30, $f5	#Resolução de Y
 	j PRINT			#PROCEDIMENTO PRINT
