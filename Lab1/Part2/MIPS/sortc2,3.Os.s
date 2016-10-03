@@ -181,11 +181,8 @@ sort:
 	addiu	$8,$7,-1
 	addu	$6,$9,$6
 .L11:
-	move 	$15, $31 #acrescentado para substituir bltzl
 	#bltzl	$8,.L10
-	bltzal 	$8,.L10
-	move	$31, $15 #acrescentado para substituir bltzl
-	#la	$8,.L10
+	la	$8,.L10
 	addiu	$7,$7,1
 
 	lw	$2,-4($6)
