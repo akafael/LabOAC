@@ -176,31 +176,33 @@ sort:
 .L10:
 	slt	$2,$7,$10
 	beq	$2,$0,.L16
-	sll	$6,$7,2
+	sll	$6,$7,2 
 
 	addiu	$8,$7,-1
-	addu	$6,$9,$6
+	addu	$6,$9,$6 # $6 = i(v[i])
 .L11:
 	#bltzl	$8,.L10
-	la	$8,.L10
+	bltz  	$8, .L10
 	addiu	$7,$7,1
 
 	lw	$2,-4($6)
 	addiu	$6,$6,-4
 	lw	$3,4($6)
 	slt	$2,$3,$2
-	beq	$2,$0,.L12
+	beq	$2,$0,.L10 # alterado de .L12 para .L10
 	move	$5,$8
 
 	jal	swap
 	move	$4,$9
 
-	b	.L11
-	addiu	$8,$8,-1
+	addiu	$7,$7,-1 #acrescentado
+	b	.L11 
+	addiu	$8,$8,-1 
 
 .L12:
 	b	.L10
-	addiu	$7,$7,1
+	nop
+	#addiu	$7,$7,1
 
 .L16:
 	lw	$31,20($sp)
