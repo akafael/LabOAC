@@ -25,6 +25,53 @@ v:
 .LC0:
 	.ascii	"\n"
 	.text
+	#.section	.text.startup,"ax",@progbits
+	#.align	2
+	.globl	main
+	.set	nomips16
+	.set	nomicromips
+	.ent	main
+	#.type	main, @function
+main:
+	.frame	$sp,24,$31		# vars= 0, regs= 2/0, args= 16, gp= 0
+	.mask	0x80010000,-4
+	.fmask	0x00000000,0
+	.set	noreorder
+	.set	nomacro
+	addiu	$sp,$sp,-24
+	li	$5,10			# 0xa
+	sw	$16,16($sp)
+	#lui	$16,%hi(v)
+	sw	$31,20($sp)
+	la	$4,v
+	jal	show
+	nop # acrescentado
+	#addiu	$4,$16,%lo(v)
+	
+
+	#addiu	$4,$16,%lo(v)
+	la	$4,v
+	jal	sort
+	li	$5,10			# 0xa
+
+	#addiu	$4,$16,%lo(v)
+	la	$4,v
+	lw	$31,20($sp)
+	li	$5,10			# 0xa
+	lw	$16,16($sp)
+	jal	show 	# alterado de j para jal
+	nop		#acrescentado
+	#addiu	$sp,$sp,24
+	#mars
+	#j	$31
+	li 	$2, 10
+	syscall	
+	#mars
+
+	.set	macro
+	.set	reorder
+	.end	main
+	.size	main, .-main
 	#.align	2
 	.globl	show
 	.set	nomips16
@@ -134,8 +181,11 @@ sort:
 	addiu	$8,$7,-1
 	addu	$6,$9,$6
 .L11:
+	move 	$15, $31 #acrescentado para substituir bltzl
 	#bltzl	$8,.L10
-	la	$8,.L10
+	bltzal 	$8,.L10
+	move	$31, $15 #acrescentado para substituir bltzl
+	#la	$8,.L10
 	addiu	$7,$7,1
 
 	lw	$2,-4($6)
@@ -164,44 +214,6 @@ sort:
 	.set	reorder
 	.end	sort
 	.size	sort, .-sort
-	#.section	.text.startup,"ax",@progbits
-	#.align	2
-	.globl	main
-	.set	nomips16
-	.set	nomicromips
-	.ent	main
-	#.type	main, @function
-main:
-	.frame	$sp,24,$31		# vars= 0, regs= 2/0, args= 16, gp= 0
-	.mask	0x80010000,-4
-	.fmask	0x00000000,0
-	.set	noreorder
-	.set	nomacro
-	addiu	$sp,$sp,-24
-	li	$5,10			# 0xa
-	sw	$16,16($sp)
-	#lui	$16,%hi(v)
-	sw	$31,20($sp)
-	jal	show
-	#addiu	$4,$16,%lo(v)
-	la	$4,v
 
-	#addiu	$4,$16,%lo(v)
-	la	$4,v
-	jal	sort
-	li	$5,10			# 0xa
-
-	#addiu	$4,$16,%lo(v)
-	la	$4,v
-	lw	$31,20($sp)
-	li	$5,10			# 0xa
-	lw	$16,16($sp)
-	j	show
-	addiu	$sp,$sp,24
-
-	.set	macro
-	.set	reorder
-	.end	main
-	.size	main, .-main
 
 	.ident	"GCC: (Sourcery CodeBench Lite 2016.05-7) 5.3.0"
