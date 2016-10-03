@@ -199,9 +199,9 @@ sort:
 	b	.L11 
 	addiu	$8,$8,-1 
 
-.L12:
-	b	.L10
-	nop
+#.L12:
+	#b	.L10
+	#nop
 	#addiu	$7,$7,1
 
 .L16:
