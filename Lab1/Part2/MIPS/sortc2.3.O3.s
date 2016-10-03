@@ -57,8 +57,14 @@ main:
 	lw	$31,20($sp)
 	li	$5,10			# 0xa
 	lw	$16,16($sp)
-	j	show
-	addiu	$sp,$sp,24
+	jal	show 	# alterado de j para jal
+	nop		#acrescentado
+	#addiu	$sp,$sp,24
+	#mars
+	#j	$31
+	li 	$2, 10
+	syscall	
+	#mars
 	
 
 	.set	macro
@@ -96,7 +102,7 @@ show:
 .L3:
 	lw	$5,0($16)
 	addiu	$17,$17,1
-	move	$4,$19
+	move	$4,$5	#segundo argumento estava $19
 	#jal	printf
 	li	$v0, 1
 	syscall
