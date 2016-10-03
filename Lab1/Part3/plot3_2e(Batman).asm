@@ -1,14 +1,14 @@
-#PLOTADOR DO SÕMBOLO DO BATMAN DE 1998
-#O PROFRAMA CONSISTE DE 4 PROGRAMAS UNIDOS EM UM S”
-#CADA SUBPROGRAMA CONSISTE EM UM PLOT DE UMA PARTE DO SÕMBOLO
+#PLOTADOR DO S√çMBOLO DO BATMAN DE 1998
+#O PROFRAMA CONSISTE DE 4 PROGRAMAS UNIDOS EM UM S√ì
+#CADA SUBPROGRAMA CONSISTE EM UM PLOT DE UMA PARTE DO S√çMBOLO
 
-.eqv VGA 0xFF000000		#ENDERE«O DA VGA
+.eqv VGA 0xFF000000		#ENDERE√áO DA VGA
 .eqv X $f0			#DEFINE X = $F0
 .eqv Y $f12			#DEFINE Y = $F12
 .eqv NUMx 320			#DEFINE NUMx = 320
-.eqv NUMy 129			#DEFINE NUMy = 240
+.eqv NUMy 119			#DEFINE NUMy = 240
 
-.data				#DECLARA VARI¡VEIS E CONSTANTES
+.data				#DECLARA VARI√ÅVEIS E CONSTANTES
 LINF:   .float -7.0		
 LSUP:   .float 7.0		
 NUMX:  	.float 320.0
@@ -50,12 +50,12 @@ YRES:	.float 0.02925
 	l.s $f25, LSUP		#f25 = LSUP
 	l.s $f4, NUMX		#f4 = NUMX
 	l.s $f5, NUMY 		#f5 = NUMY
-	sub.s $f26, $f25, $f24	#ResoluÁ„o de X
-	div.s $f26, $f26, $f4	#ResoluÁ„o de X
+	sub.s $f26, $f25, $f24	#Resolu√ß√£o de X
+	div.s $f26, $f26, $f4	#Resolu√ß√£o de X
 	l.s $f30, YRES
 	j PRINT			#PROCEDIMENTO PRINT
 	
-FUNCAO:	abs.s $f10, X		#2*sqrt(-||x|-1|*|3-|x||/((|x|-1)*(3-|x|)))(1+||x|-3|/(|x|-3))sqrt(1-(x/7)≤)+
+FUNCAO:	abs.s $f10, X		#2*sqrt(-||x|-1|*|3-|x||/((|x|-1)*(3-|x|)))(1+||x|-3|/(|x|-3))sqrt(1-(x/7)¬≤)+
 	sub.s $f6, $f22, $f10	#(5+0.97*(|x-0.5|+|x+0.5|)-3(|x-0.75|+|x+0.75|))(1+|1-|x||/(1-|x|))
 	abs.s $f6, $f6
 	sub.s $f7, $f10, $f11
@@ -111,52 +111,52 @@ E1:	li $t5, 0xFF		#Para NaN, plotar em branco
 	
 PRINT:	mov.s X, $f24		#Reseta X
 	mul $t2, $t2, 0
-	c.eq.s X, $f25		#CondiÁıes de Loop
+	c.eq.s X, $f25		#Condi√ß√µes de Loop
 	bc1f PLOT		#Se X != LSUP, executa plot	
 	j P2
 	
-PLOT:	la $s0, VGA		#s0 = endereÁo da VGA
+PLOT:	la $s0, VGA		#s0 = endere√ßo da VGA
 L1:	li $t5,0x7		#Cor vermelha
-	jal FUNCAO		#Calcula a funÁ„o
-	div.s Y, Y, $f30	#Ajusta a resoluÁ„o de Y
-	c.lt.s Y, $f18		#Se Y<0, v· para L3
+	jal FUNCAO		#Calcula a fun√ß√£o
+	div.s Y, Y, $f30	#Ajusta a resolu√ß√£o de Y
+	c.lt.s Y, $f18		#Se Y<0, v√° para L3
 	bc1t L3
 	cvt.w.s Y, Y		#Converte Y de float para word
 	mfc1 $t4, Y		#Copia Y para t4
-	sub $t4, $t0, $t4	#Ajusta Y para comeÁar do (129,0) ou (239,0), n„o do (0,0)
+	sub $t4, $t0, $t4	#Ajusta Y para come√ßar do (129,0) ou (239,0), n√£o do (0,0)
 	mul $t4, $t4, $t1	#320*Y
 	add $t4, $t4, $t2	# +X
-	slti $t7, $t4, 0	#N„o pintar caso o byte calculado seja anterior ao inicio de 0xFF000000
+	slti $t7, $t4, 0	#N√£o pintar caso o byte calculado seja anterior ao inicio de 0xFF000000
 	beqz $t7, DRAW		
-	c.le.s $f25, X		#CondiÁıes de Loop
+	c.le.s $f25, X		#Condi√ß√µes de Loop
 	bc1t P2
 	addi $t2, $t2, 1	#t2 = t2 + 1
-	add.s X, X, $f26	#X = X + ResoluÁ„o em X
+	add.s X, X, $f26	#X = X + Resolu√ß√£o em X
 	j L1
 
-#O meio da tela È o eixo X, ou seja Y =0. Caso Y seja menor que zero, o ajuste do offset È (129 + mÛdulo de Y*ResoluÁ„o_Y)(L3)
-#Caso Y seja maior que zero, o ajuste de offset È 129 - (Y*resoluÁ„o de Y)
+#O meio da tela √© o eixo X, ou seja Y =0. Caso Y seja menor que zero, o ajuste do offset √© (129 + m√≥dulo de Y*Resolu√ß√£o_Y)(L3)
+#Caso Y seja maior que zero, o ajuste de offset √© 129 - (Y*resolu√ß√£o de Y)
 
-L3:	abs.s Y, Y		#Tira o mÛdulo de Y
+L3:	abs.s Y, Y		#Tira o m√≥dulo de Y
 	cvt.w.s Y, Y		#Converte Y de float para word
 	mfc1 $t4, Y		#Copia Y para t4
-	add $t4, $t0, $t4	#Ajusta Y para comeÁar do (129,0) ou (239,0), n„o do (0,0)
+	add $t4, $t0, $t4	#Ajusta Y para come√ßar do (129,0) ou (239,0), n√£o do (0,0)
 	mul $t4, $t4, $t1	#320*Y
 	add $t4, $t4, $t2	# +X
-	slti $t7, $t4, 0	#N„o pintar caso o byte calculado seja anterior ao inicio de 0xFF000000
+	slti $t7, $t4, 0	#N√£o pintar caso o byte calculado seja anterior ao inicio de 0xFF000000
 	beqz $t7, DRAW
-	c.le.s $f25, X		#CondiÁıes de Loop
+	c.le.s $f25, X		#Condi√ß√µes de Loop
 	bc1t P2
 	addi $t2, $t2, 1	#t2 = t2 + 1
-	add.s X, X, $f26	#X = X + ResoluÁ„o em X
+	add.s X, X, $f26	#X = X + Resolu√ß√£o em X
 	j L1
 	
-DRAW:	add $t4, $s0, $t4	#Desenha o gr·fico
+DRAW:	add $t4, $s0, $t4	#Desenha o gr√°fico
 	sb $t5, 0($t4)
-	c.le.s $f25, X		#CondiÁıes de Loop
+	c.le.s $f25, X		#Condi√ß√µes de Loop
 	bc1t P2
 	addi $t2, $t2, 1	#t2 = t2 + 1
-	add.s X, X, $f26	#X = X + ResoluÁ„o em X
+	add.s X, X, $f26	#X = X + Resolu√ß√£o em X
 	j L1
 
 
@@ -180,19 +180,19 @@ P2:	andi $t2, $t2, 0	#Reseta t2
 	l.s $f25, LSUP		#f25 = LSUP
 	l.s $f4, NUMX		#f4 = NUMX
 	l.s $f5, NUMY 		#f5 = NUMY
-	sub.s $f26, $f25, $f24	#ResoluÁ„o de X
-	div.s $f26, $f26, $f4	#ResoluÁ„o de X
+	sub.s $f26, $f25, $f24	#Resolu√ß√£o de X
+	div.s $f26, $f26, $f4	#Resolu√ß√£o de X
 	l.s $f30, YRES
 	j PRINT_2		#PROCEDIMENTO PRINT
 	
 
-FUNCAO_2:c.lt.s X, $f16		#Verifica se a funÁ„o 2 est· no domÌnio real
+FUNCAO_2:c.lt.s X, $f16		#Verifica se a fun√ß√£o 2 est√° no dom√≠nio real
 	bc1t E1_2		
 	c.lt.s $f22, X
 	bc1t E1_2
 	c.lt.s X, $f11
 	bc1t E2_2
-BACK_2:	abs.s $f10, X		#(2.7105 + 1.5 - 0.5abs(x) - 1.3553sqrt(4 - (abs(x) - 1)≤))*
+BACK_2:	abs.s $f10, X		#(2.7105 + 1.5 - 0.5abs(x) - 1.3553sqrt(4 - (abs(x) - 1)¬≤))*
 	sub.s $f6,  $f10, $f11	# sqrt(abs(abs(x) - 1) / (abs(x) - 1)) + 0.9
 	mul.s $f6, $f6, $f6
 	sub.s $f6, $f8, $f6
@@ -220,52 +220,52 @@ E2_2:	c.lt.s $f17, X
 	
 PRINT_2:mov.s X, $f24		#Reseta X
 	mul $t2, $t2, 0
-	c.eq.s X, $f25		#CondiÁıes de Loop
+	c.eq.s X, $f25		#Condi√ß√µes de Loop
 	bc1f PLOT_2		#Se X != LSUP, executa plot	
 	j P3
 	
-PLOT_2:	la $s0, VGA		#s0 = endereÁo da VGA
+PLOT_2:	la $s0, VGA		#s0 = endere√ßo da VGA
 L1_2:	li $t5,0x7		#Cor vermelha
-	jal FUNCAO_2		#Calcula a funÁ„o
-	div.s Y, Y, $f30	#Ajusta a resoluÁ„o de Y
-	c.lt.s Y, $f18		#Se Y<0, v· para L3
+	jal FUNCAO_2		#Calcula a fun√ß√£o
+	div.s Y, Y, $f30	#Ajusta a resolu√ß√£o de Y
+	c.lt.s Y, $f18		#Se Y<0, v√° para L3
 	bc1t L3_2
 	cvt.w.s Y, Y		#Converte Y de float para word
 	mfc1 $t4, Y		#Copia Y para t4
-	sub $t4, $t0, $t4	#Ajusta Y para comeÁar do (129,0) ou (239,0), n„o do (0,0)
+	sub $t4, $t0, $t4	#Ajusta Y para come√ßar do (129,0) ou (239,0), n√£o do (0,0)
 	mul $t4, $t4, $t1	#320*Y
 	add $t4, $t4, $t2	# +X
-	slti $t7, $t4, 0	#N„o pintar caso o byte calculado seja anterior ao inicio de 0xFF000000
+	slti $t7, $t4, 0	#N√£o pintar caso o byte calculado seja anterior ao inicio de 0xFF000000
 	beqz $t7, DRAW_2		
-	c.le.s $f25, X		#CondiÁıes de Loop
+	c.le.s $f25, X		#Condi√ß√µes de Loop
 	bc1t P3
 	addi $t2, $t2, 1	#t2 = t2 + 1
-	add.s X, X, $f26	#X = X + ResoluÁ„o em X
+	add.s X, X, $f26	#X = X + Resolu√ß√£o em X
 	j L1_2
 
-#O meio da tela È o eixo X, ou seja Y =0. Caso Y seja menor que zero, o ajuste do offset È (129 + mÛdulo de Y*ResoluÁ„o_Y)(L3)
-#Caso Y seja maior que zero, o ajuste de offset È 129 - (Y*resoluÁ„o de Y)
+#O meio da tela √© o eixo X, ou seja Y =0. Caso Y seja menor que zero, o ajuste do offset √© (129 + m√≥dulo de Y*Resolu√ß√£o_Y)(L3)
+#Caso Y seja maior que zero, o ajuste de offset √© 129 - (Y*resolu√ß√£o de Y)
 
-L3_2:	abs.s Y, Y		#Tira o mÛdulo de Y
+L3_2:	abs.s Y, Y		#Tira o m√≥dulo de Y
 	cvt.w.s Y, Y		#Converte Y de float para word
 	mfc1 $t4, Y		#Copia Y para t4
-	add $t4, $t0, $t4	#Ajusta Y para comeÁar do (129,0) ou (239,0), n„o do (0,0)
+	add $t4, $t0, $t4	#Ajusta Y para come√ßar do (129,0) ou (239,0), n√£o do (0,0)
 	mul $t4, $t4, $t1	#320*Y
 	add $t4, $t4, $t2	# +X
-	slti $t7, $t4, 0	#N„o pintar caso o byte calculado seja anterior ao inicio de 0xFF000000
+	slti $t7, $t4, 0	#N√£o pintar caso o byte calculado seja anterior ao inicio de 0xFF000000
 	beqz $t7, DRAW_2
-	c.le.s $f25, X		#CondiÁıes de Loop
+	c.le.s $f25, X		#Condi√ß√µes de Loop
 	bc1t P3
 	addi $t2, $t2, 1	#t2 = t2 + 1
-	add.s X, X, $f26	#X = X + ResoluÁ„o em X
+	add.s X, X, $f26	#X = X + Resolu√ß√£o em X
 	j L1_2
 	
-DRAW_2:	add $t4, $s0, $t4	#Desenha o gr·fico
+DRAW_2:	add $t4, $s0, $t4	#Desenha o gr√°fico
 	sb $t5, 0($t4)
-	c.le.s $f25, X		#CondiÁıes de Loop
+	c.le.s $f25, X		#Condi√ß√µes de Loop
 	bc1t P3
 	addi $t2, $t2, 1	#t2 = t2 + 1
-	add.s X, X, $f26	#X = X + ResoluÁ„o em X
+	add.s X, X, $f26	#X = X + Resolu√ß√£o em X
 	j L1_2
 	
 ##################################################################################################
@@ -282,19 +282,19 @@ P3:	andi $t2, $t2, 0	#Reseta t2
 	l.s $f25, LSUP		#f25 = LSUP
 	l.s $f4, NUMX		#f4 = NUMX
 	l.s $f5, NUMY 		#f5 = NUMY
-	sub.s $f26, $f25, $f24	#ResoluÁ„o de X
-	div.s $f26, $f26, $f4	#ResoluÁ„o de X
+	sub.s $f26, $f25, $f24	#Resolu√ß√£o de X
+	div.s $f26, $f26, $f4	#Resolu√ß√£o de X
 	l.s $f30, YRES
 	j PRINT_3		#PROCEDIMENTO PRINT
 	
 
-FUNCAO_3:c.lt.s X, $f24		#Verifica se a funÁ„o 3 est· no domÌnio real
+FUNCAO_3:c.lt.s X, $f24		#Verifica se a fun√ß√£o 3 est√° no dom√≠nio real
 	bc1t E1_3
 	c.lt.s $f27, X
 	bc1t E1_3
 	c.lt.s X, $f8
 	bc1t E2_3
-BACK_3:	div.s $f6, X, $f27	#-3*sqrt(1 - (x / 7)≤)* sqrt(abs(abs(x) - 4) / (abs(x) - 4))
+BACK_3:	div.s $f6, X, $f27	#-3*sqrt(1 - (x / 7)¬≤)* sqrt(abs(abs(x) - 4) / (abs(x) - 4))
 	mul.s $f6, $f6, $f6
 	sub.s $f6, $f11, $f6
 	sqrt.s $f6, $f6
@@ -316,52 +316,52 @@ E2_3:	c.lt.s $f9, X
 	bc1t E1_3
 PRINT_3:mov.s X, $f24		#Reseta X
 	mul $t2, $t2, 0
-	c.eq.s X, $f25		#CondiÁıes de Loop
+	c.eq.s X, $f25		#Condi√ß√µes de Loop
 	bc1f PLOT_3		#Se X != LSUP, executa plot	
 	j P4
 	
-PLOT_3:	la $s0, VGA		#s0 = endereÁo da VGA
+PLOT_3:	la $s0, VGA		#s0 = endere√ßo da VGA
 L1_3:	li $t5,0x7		#Cor vermelha
-	jal FUNCAO_3		#Calcula a funÁ„o
-	div.s Y, Y, $f30	#Ajusta a resoluÁ„o de Y
-	c.lt.s Y, $f18		#Se Y<0, v· para L3
+	jal FUNCAO_3		#Calcula a fun√ß√£o
+	div.s Y, Y, $f30	#Ajusta a resolu√ß√£o de Y
+	c.lt.s Y, $f18		#Se Y<0, v√° para L3
 	bc1t L3_3
 	cvt.w.s Y, Y		#Converte Y de float para word
 	mfc1 $t4, Y		#Copia Y para t4
-	sub $t4, $t0, $t4	#Ajusta Y para comeÁar do (129,0) ou (239,0), n„o do (0,0)
+	sub $t4, $t0, $t4	#Ajusta Y para come√ßar do (129,0) ou (239,0), n√£o do (0,0)
 	mul $t4, $t4, $t1	#320*Y
 	add $t4, $t4, $t2	# +X
-	slti $t7, $t4, 0	#N„o pintar caso o byte calculado seja anterior ao inicio de 0xFF000000
+	slti $t7, $t4, 0	#N√£o pintar caso o byte calculado seja anterior ao inicio de 0xFF000000
 	beqz $t7, DRAW_3		
-	c.le.s $f25, X		#CondiÁıes de Loop
+	c.le.s $f25, X		#Condi√ß√µes de Loop
 	bc1t P4
 	addi $t2, $t2, 1	#t2 = t2 + 1
-	add.s X, X, $f26	#X = X + ResoluÁ„o em X
+	add.s X, X, $f26	#X = X + Resolu√ß√£o em X
 	j L1
 
-#O meio da tela È o eixo X, ou seja Y =0. Caso Y seja menor que zero, o ajuste do offset È (129 + mÛdulo de Y*ResoluÁ„o_Y)(L3)
-#Caso Y seja maior que zero, o ajuste de offset È 129 - (Y*resoluÁ„o de Y)
+#O meio da tela √© o eixo X, ou seja Y =0. Caso Y seja menor que zero, o ajuste do offset √© (129 + m√≥dulo de Y*Resolu√ß√£o_Y)(L3)
+#Caso Y seja maior que zero, o ajuste de offset √© 129 - (Y*resolu√ß√£o de Y)
 
-L3_3:	abs.s Y, Y		#Tira o mÛdulo de Y
+L3_3:	abs.s Y, Y		#Tira o m√≥dulo de Y
 	cvt.w.s Y, Y		#Converte Y de float para word
 	mfc1 $t4, Y		#Copia Y para t4
-	add $t4, $t0, $t4	#Ajusta Y para comeÁar do (129,0) ou (239,0), n„o do (0,0)
+	add $t4, $t0, $t4	#Ajusta Y para come√ßar do (129,0) ou (239,0), n√£o do (0,0)
 	mul $t4, $t4, $t1	#320*Y
 	add $t4, $t4, $t2	# +X
-	slti $t7, $t4, 0	#N„o pintar caso o byte calculado seja anterior ao inicio de 0xFF000000
+	slti $t7, $t4, 0	#N√£o pintar caso o byte calculado seja anterior ao inicio de 0xFF000000
 	beqz $t7, DRAW_3
-	c.le.s $f25, X		#CondiÁıes de Loop
+	c.le.s $f25, X		#Condi√ß√µes de Loop
 	bc1t P4
 	addi $t2, $t2, 1	#t2 = t2 + 1
-	add.s X, X, $f26	#X = X + ResoluÁ„o em X
+	add.s X, X, $f26	#X = X + Resolu√ß√£o em X
 	j L1_3
 	
-DRAW_3:	add $t4, $s0, $t4	#Desenha o gr·fico
+DRAW_3:	add $t4, $s0, $t4	#Desenha o gr√°fico
 	sb $t5, 0($t4)
-	c.le.s $f25, X		#CondiÁıes de Loop
+	c.le.s $f25, X		#Condi√ß√µes de Loop
 	bc1t P4
 	addi $t2, $t2, 1	#t2 = t2 + 1
-	add.s X, X, $f26	#X = X + ResoluÁ„o em X
+	add.s X, X, $f26	#X = X + Resolu√ß√£o em X
 	j L1_3
 
 #######################################################################################################################
@@ -379,8 +379,8 @@ P4:	andi $t2, $t2, 0	#Reseta t2
 	l.s $f25, LSUP		#f25 = LSUP
 	l.s $f4, NUMX		#f4 = NUMX
 	l.s $f5, NUMY 		#f5 = NUMY
-	sub.s $f26, $f25, $f24	#ResoluÁ„o de X
-	div.s $f26, $f26, $f4	#ResoluÁ„o de X
+	sub.s $f26, $f25, $f24	#Resolu√ß√£o de X
+	div.s $f26, $f26, $f4	#Resolu√ß√£o de X
 	l.s $f30, YRES
 	j PRINT_4		#PROCEDIMENTO PRINT
 
@@ -388,11 +388,11 @@ P4:	andi $t2, $t2, 0	#Reseta t2
 EXIT:	li $v0,10		#Encerra o programa
 	syscall
 
-FUNCAO_4:c.lt.s X, $f9		#Verifica se a funÁ„o 4 est„ no domÌnio real
+FUNCAO_4:c.lt.s X, $f9		#Verifica se a fun√ß√£o 4 est√£ no dom√≠nio real
 	bc1t E1_4
 	c.lt.s $f8, X
 	bc1t E1
-	abs.s $f17, X		#abs(x / 2) - 0.0914x≤ - 3 + sqrt(1 - (abs(abs(x) - 2) - 1)≤)
+	abs.s $f17, X		#abs(x / 2) - 0.0914x¬≤ - 3 + sqrt(1 - (abs(abs(x) - 2) - 1)¬≤)
 	div.s $f6, X, $f19
 	abs.s $f6, $f6
 	mul.s $f7, X, X
@@ -412,50 +412,50 @@ E1_4:	li $t5, 0xFF		#Para NaN, plotar em branco
 	
 PRINT_4:mov.s X, $f24		#Reseta X
 	mul $t2, $t2, 0
-	c.eq.s X, $f25		#CondiÁıes de Loop
+	c.eq.s X, $f25		#Condi√ß√µes de Loop
 	bc1f PLOT_4		#Se X != LSUP, executa plot	
 	j EXIT
 	
-PLOT_4:	la $s0, VGA		#s0 = endereÁo da VGA
+PLOT_4:	la $s0, VGA		#s0 = endere√ßo da VGA
 L1_4:	li $t5,0x7		#Cor vermelha
-	jal FUNCAO_4		#Calcula a funÁ„o
-	div.s Y, Y, $f30	#Ajusta a resoluÁ„o de Y
-	c.lt.s Y, $f18		#Se Y<0, v· para L3
+	jal FUNCAO_4		#Calcula a fun√ß√£o
+	div.s Y, Y, $f30	#Ajusta a resolu√ß√£o de Y
+	c.lt.s Y, $f18		#Se Y<0, v√° para L3
 	bc1t L3_4
 	cvt.w.s Y, Y		#Converte Y de float para word
 	mfc1 $t4, Y		#Copia Y para t4
-	sub $t4, $t0, $t4	#Ajusta Y para comeÁar do (129,0), n„o do (0,0)
+	sub $t4, $t0, $t4	#Ajusta Y para come√ßar do (129,0), n√£o do (0,0)
 	mul $t4, $t4, $t1	#320*Y
 	add $t4, $t4, $t2	# +X
-	slti $t7, $t4, 0	#N„o pintar caso o byte calculado seja anterior ao inicio de 0xFF000000
+	slti $t7, $t4, 0	#N√£o pintar caso o byte calculado seja anterior ao inicio de 0xFF000000
 	beqz $t7, DRAW_4	
-	c.le.s $f25, X		#CondiÁıes de Loop
+	c.le.s $f25, X		#Condi√ß√µes de Loop
 	bc1t EXIT
 	addi $t2, $t2, 1	#t2 = t2 + 1
-	add.s X, X, $f26	#X = X + ResoluÁ„o em X
+	add.s X, X, $f26	#X = X + Resolu√ß√£o em X
 	j L1_4
 
-#O meio da tela È o eixo X, ou seja Y =0. Caso Y seja menor que zero, o ajuste do offset È (129 + mÛdulo de Y*ResoluÁ„o_Y)(L3)
-#Caso Y seja maior que zero, o ajuste de offset È 129 - (Y*resoluÁ„o de Y)
+#O meio da tela √© o eixo X, ou seja Y =0. Caso Y seja menor que zero, o ajuste do offset √© (129 + m√≥dulo de Y*Resolu√ß√£o_Y)(L3)
+#Caso Y seja maior que zero, o ajuste de offset √© 129 - (Y*resolu√ß√£o de Y)
 
-L3_4:	abs.s Y, Y		#Tira o mÛdulo de Y
+L3_4:	abs.s Y, Y		#Tira o m√≥dulo de Y
 	cvt.w.s Y, Y		#Converte Y de float para word
 	mfc1 $t4, Y		#Copia Y para t4
-	add $t4, $t0, $t4	#Ajusta Y para comeÁar do (129,0) ou (239,0), n„o do (0,0)
+	add $t4, $t0, $t4	#Ajusta Y para come√ßar do (129,0) ou (239,0), n√£o do (0,0)
 	mul $t4, $t4, $t1	#320*Y
 	add $t4, $t4, $t2	# +X
-	slti $t7, $t4, 0	#N„o pintar caso o byte calculado seja anterior ao inicio de 0xFF000000
+	slti $t7, $t4, 0	#N√£o pintar caso o byte calculado seja anterior ao inicio de 0xFF000000
 	beqz $t7, DRAW_4
-	c.le.s $f25, X		#CondiÁıes de Loop
+	c.le.s $f25, X		#Condi√ß√µes de Loop
 	bc1t EXIT
 	addi $t2, $t2, 1	#t2 = t2 + 1
-	add.s X, X, $f26	#X = X + ResoluÁ„o em X
+	add.s X, X, $f26	#X = X + Resolu√ß√£o em X
 	j L1_4
 	
-DRAW_4:	add $t4, $s0, $t4	#Desenha o gr·fico
+DRAW_4:	add $t4, $s0, $t4	#Desenha o gr√°fico
 	sb $t5, 0($t4)
-	c.le.s $f25, X		#CondiÁıes de Loop
+	c.le.s $f25, X		#Condi√ß√µes de Loop
 	bc1t EXIT
 	addi $t2, $t2, 1	#t2 = t2 + 1
-	add.s X, X, $f26	#X = X + ResoluÁ„o em X
+	add.s X, X, $f26	#X = X + Resolu√ß√£o em X
 	j L1_4
