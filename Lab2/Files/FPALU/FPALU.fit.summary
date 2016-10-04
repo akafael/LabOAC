@@ -1,0 +1,16 @@
+Fitter Status : Successful - Sat Sep 24 20:15:00 2016
+Quartus II 64-Bit Version : 13.0.1 Build 232 06/12/2013 SP 1 SJ Web Edition
+Revision Name : FPALU
+Top-level Entity Name : FPALU
+Family : Cyclone II
+Device : EP2C70F896C6
+Timing Models : Final
+Total logic elements : 3,531 / 68,416 ( 5 % )
+    Total combinational functions : 3,272 / 68,416 ( 5 % )
+    Dedicated logic registers : 1,840 / 68,416 ( 3 % )
+Total registers : 1840
+Total pins : 106 / 622 ( 17 % )
+Total virtual pins : 0
+Total memory bits : 4,894 / 1,152,000 ( < 1 % )
+Embedded Multiplier 9-bit elements : 23 / 300 ( 8 % )
+Total PLLs : 0 / 4 ( 0 % )
