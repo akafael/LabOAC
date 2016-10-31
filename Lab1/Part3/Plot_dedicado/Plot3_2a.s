@@ -1,0 +1,93 @@
+.eqv VGA 0xFF000000
+.eqv NUMX 320
+.eqv NUMY 240
+
+.data
+LINF:  	.float -1.0
+LSUP:	.float  1.0
+NX:	.float  320
+NY:	.float  240
+UM:	.float  1.0
+
+.text
+MAIN:	jal PLOT
+	li $v0,10
+	syscall
+
+FUNCAO:	# letra b)
+	l.s $f1,UM
+	mul.s $f12,$f0,$f0
+	add.s $f12,$f12,$f1
+	jr $ra	
+			
+PLOT:	
+	ori $t5,$zero,320
+ 	
+	
+	#plot
+	la $at, LINF
+	lwc1 $f1, 0($at)	# -1.0 LINF
+	
+	
+	la $at, LSUP
+	lwc1 $f2, 0($at)	# 1.0
+	
+	
+	la $at,NX
+	lwc1 $f4, 0($at)	#320 pixels
+	
+	sub.s $f3,$f2,$f1	#  f3 = fsup - flinf
+	div.s $f3,$f3,$f4	# f3 = x_resol
+	
+				
+	lui $at,0x3f40		#
+	mtc1 $at,$f4		# 0.75 = 240/320
+	
+	
+	div.s $f4,$f3,$f4	# f4 = y_resol
+	
+	
+	andi $s2,$s2, 0		#força os bits de s2 a ser 0 #primeiro pixel de x
+	 
+	add.s $f5,$f0,$f0 	# f5 = 0+0  #primeiro pixel x 
+	
+	
+	
+loop:				#realiza essa linha 
+	mul.s $f6,$f5,$f3 	# f6 = f5 * x_resol
+	add.s $f6,$f6,$f1	# f6 = f6 + fLINF 
+	sub.s $f6,$f0,$f6	# mesma coisa que f6 = -f6  func
+	# jal func
+	sub.s $f6,$f6,$f1	# f6 = f6 - fLINF
+	div.s $f6,$f6,$f4 	# f6 = f6/y_resol ou  f6 = f6*0.75
+	
+	cvt.w.s $f7, $f6  	#converte float para int
+	mfc1 $t4,$f7
+	
+	
+	nor $t4,$t4,$t4         #faz t4= t4' para poder somar com um e obter -t4					<<<<
+	addi $t4,$t4,241	#toma 240 para arrumar o numero de pixels e 1 para negativar t4                     	<<<<<
+	
+	slti $at,$t4,240       # veriica se o ultrapassa o numero de pixels   t4<240 ? 1:0
+	beq $at,$zero, pula    # ultrapassa numero de pixels 
+	slti $at,$t4,0         #t4 <0 ? 1:0
+	bne $at,$zero,pula     #ultrapassa
+
+	#pinta 	 	 	
+	lui $t1, 0XFF00		#prepara para 	
+	mul  $t4, $t4, $t5	# y*320	
+	add  $t4, $s2, $t4
+	add  $t1, $t4, $t1	
+	addi $t0, $zero,0	
+	sb $t0, 0($t1)		
+	
+	
+pula:	addi $s2,$s2,1		#  s2++
+	mtc1 $s2,$f5
+	cvt.s.w $f5,$f5
+	#add.s $f5,$f5,$f2     	# f5 = f5 + 1 (pois f2 = LSUP) 		
+	slti $t3,$s2,320		#  s2< 10 ? 1:0
+	bne  $t3,$zero,loop	#  t3 !=  0 ? loop : pc+4 
+	
+
+	
