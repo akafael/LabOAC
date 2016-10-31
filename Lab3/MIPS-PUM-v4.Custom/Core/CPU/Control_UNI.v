@@ -251,10 +251,10 @@ begin
                 FUNSLLV,
                 FUNSRLV,
                 FUNSRAV,
-                FUNMADD,
-                FUNMADDU,
-                FUNMSUB,
-                FUNMSUBU:
+                FUNMADD,   // 2016/02
+                FUNMADDU,  // 2016/02
+                FUNMSUB,   // 2016/02
+                FUNMSUBU:  // 2016/02
                 begin
                     oRegDst             = 2'b01;
                     oOrigALU            = 2'b00;
