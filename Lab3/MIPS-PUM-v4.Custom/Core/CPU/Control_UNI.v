@@ -250,7 +250,11 @@ begin
                 FUNSLTU,
                 FUNSLLV,
                 FUNSRLV,
-                FUNSRAV:
+                FUNSRAV,
+                FUNMADD,
+                FUNMADDU,
+                FUNMSUB,
+                FUNMSUBU:
                 begin
                     oRegDst             = 2'b01;
                     oOrigALU            = 2'b00;
