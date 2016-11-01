@@ -1,0 +1,16 @@
+Fitter Status : Successful - Tue Nov 01 02:20:36 2016
+Quartus II 64-Bit Version : 13.0.0 Build 156 04/24/2013 SJ Web Edition
+Revision Name : TopDE-FastCompilation
+Top-level Entity Name : TopDE
+Family : Cyclone II
+Device : EP2C70F896C6
+Timing Models : Final
+Total logic elements : 16,007 / 68,416 ( 23 % )
+    Total combinational functions : 15,084 / 68,416 ( 22 % )
+    Dedicated logic registers : 3,720 / 68,416 ( 5 % )
+Total registers : 3720
+Total pins : 566 / 622 ( 91 % )
+Total virtual pins : 0
+Total memory bits : 849,595 / 1,152,000 ( 74 % )
+Embedded Multiplier 9-bit elements : 34 / 300 ( 11 % )
+Total PLLs : 3 / 4 ( 75 % )
