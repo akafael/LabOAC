@@ -29,10 +29,6 @@ parameter
     OPMTHI      = 5'b10101,             //21        2015/1
     OPMTLO      = 5'b10110,             //22        2015/1
     OPSGT       = 5'b10111,             //23        2016/1
-    OPMADD      = 5'b11000,             //24        2016/2
-    OPMADDU     = 5'b11001,             //25        2016/2
-    OPMSUB      = 5'b11010,             //26        2016/2
-    OPMSUBU     = 5'b11011,             //27        2016/2
 
 /* Operacoes da ULA FP */
     OPADDS      = 4'b0001,
@@ -113,6 +109,7 @@ parameter
     OPCLUI      = 6'h0F,
     OPCCOP0     = 6'h10,                // feito no semestre 2013/1 para implementar a deteccao de excecoes (COP0)
     OPCFLT      = 6'h11,                /*OPCODE para operacoes da FPU*/
+    OPCMUL      = 6'h1c,		// 2/2016 OPCODE para operações MADD, MADDU, MSUB, MSUBU e MUL
     OPCLW       = 6'h23,
     OPCLB       = 6'h20,
     OPCLBU      = 6'h24,
