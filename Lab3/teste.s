@@ -128,7 +128,7 @@ zero4:
     bltz $zero, zero5
     ori $t0, $zero, 0x00fb
 zero5:
-    bltzal $zero, fim
+    bltzal $zero, test.mem
     ori $t0, $zero, 0x00fa
 
 # Test Memory Access ----------------------------------------------------------
