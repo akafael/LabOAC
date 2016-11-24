@@ -115,6 +115,7 @@ begin
 	)
 		oCOP0ExcCode <= EXCODEFPALU;
 	else if (iOp == OPCCOP0)
+
 		oCOP0ExcCode <= EXCODEINSTR;
 	else if (wCOP0PendingInterrupt)
 		oCOP0ExcCode <= EXCODEINT;
@@ -164,6 +165,10 @@ begin
 							   end
 							else
 								nx_state	<= RFMT;
+				//2/2016
+				OPMACC:
+					nx_state	<= wCOP0PendingInterrupt ? COP0EXC : MACC;
+				
 				OPCJMP:
 					nx_state	<= wCOP0PendingInterrupt ? COP0EXC : JUMP;
 				OPCBEQ:
@@ -473,6 +478,16 @@ begin
 			word	<= 40'b0000000000000000000000000000000000000011;
 			nx_state	<= ((iFunct == FUNADD || iFunct == FUNSUB) && iCOP0ALUoverflow && ~iCOP0ExcLevel) || wCOP0PendingInterrupt ? COP0EXC : FETCH;
 		end
+		
+		// Adicionado 2/2016
+		// Diferencia das demais RFMT pois aluop = 11
+		MACC:
+		begin
+			//FPRegDst[2], FPDataReg[2], FPRegWrite, FPPCWriteBc1t, FPPCWriteBc1f, FPFlagWrite, FPU2Mem, ClearJAction, JReset, SleepWrite, Store[3], PCWrite, PCWriteBNE, PCWriteBEQ, IorD, MemRead, MemWrite, IRWrite, MemtoReg, PCSource[3], ALUop[2], ALUSrcB[3], ALUSrcA[2], RegWrite, RegDst
+			word	<= 40'b0000000000000000000000000000000110000100;
+			nx_state	<= FETCH;
+		end
+		
 		SHIFT:
 		begin
 			//FPRegDst[2], FPDataReg[2], FPRegWrite, FPPCWriteBc1t, FPPCWriteBc1f, FPFlagWrite, FPU2Mem, ClearJAction, JReset, SleepWrite, Store[3], PCWrite, PCWriteBNE, PCWriteBEQ, IorD, MemRead, MemWrite, IRWrite, MemtoReg, PCSource[3], ALUop[2], ALUSrcB[3], ALUSrcA[2], RegWrite, RegDst			
