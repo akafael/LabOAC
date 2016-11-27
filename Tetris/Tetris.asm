@@ -2,8 +2,6 @@
 ###############
 #Variaveis
 ###############
-COLLISION.BASE:		.word 	0xFF012C00		# Para uma screen de 320x240 = 12C00
-
 TECLADO:		.word 	0xFF000004 
 
 ####
@@ -20,8 +18,8 @@ PLAYER1.NEWPIECE.FLAG:	.word   1
 PLAYER1.DRAW.FLAG:	.word   1
 PLAYER1.LOST.FLAG:	.word   0
 
-PLAYER1.INITIAL.PIVO:	.word   0xFF003EB2		# CUIDADO! endereco deve estar alinhado pois armazenamos por store word
-PLAYER1.INIT.FIELD.PIVO:.word   0xFF003E9E		# INITIAL.PIVO - 4 * SQUARE.UNIT.SIZE
+PLAYER1.INITIAL.PIVO:	.word   0xFF003EAA		# CUIDADO! endereco deve estar alinhado pois armazenamos por store word
+PLAYER1.INIT.FIELD.PIVO:.word   0xFF003E96		# 320 * 50 + 20(pixels antes de começar campo) + 2
 PLAYER1.CURRENT.PIVO:	.word	0			 
 PLAYER1.PAST.PIVO:	.word	0 
 
@@ -42,8 +40,8 @@ PLAYER2.NEWPIECE.FLAG:	.word   1
 PLAYER2.DRAW.FLAG:	.word   1
 PLAYER2.LOST.FLAG:	.word   0
 
-PLAYER2.INITIAL.PIVO:	.word   0xFF000302		# CUIDADO! endereco deve estar alinhado pois armazenamos por store word
-PLAYER2.INIT.FIELD.PIVO:.word   0xFF0002EE		# INITIAL.PIVO - 4 * SQUARE.UNIT.SIZE
+PLAYER2.INITIAL.PIVO:	.word   0xFF003EFA		# CUIDADO! endereco deve estar alinhado pois armazenamos por store word
+PLAYER2.INIT.FIELD.PIVO:.word   0xFF003EE6		# INITIAL.PIVO - 4 * SQUARE.UNIT.SIZE
 PLAYER2.CURRENT.PIVO:	.word	0
 PLAYER2.PAST.PIVO:	.word	0
 
@@ -64,7 +62,8 @@ PLAYER3.NEWPIECE.FLAG:	.word   1
 PLAYER3.DRAW.FLAG:	.word   1
 PLAYER3.LOST.FLAG:	.word   0
 
-PLAYER3.INITIAL.PIVO:	.word   0xFF00033E		# CUIDADO! endereco deve estar alinhado pois armazenamos por store word
+PLAYER3.INITIAL.PIVO:	.word   0xFF003F4A		# CUIDADO! endereco deve estar alinhado pois armazenamos por store word
+PLAYER3.INIT.FIELD.PIVO:.word   0xFF003F36
 PLAYER3.CURRENT.PIVO:	.word	0
 PLAYER3.PAST.PIVO:	.word	0
 
@@ -85,7 +84,8 @@ PLAYER4.NEWPIECE.FLAG:	.word   1
 PLAYER4.DRAW.FLAG:	.word   1
 PLAYER4.LOST.FLAG:	.word   0
 
-PLAYER4.INITIAL.PIVO:	.word   0xFF00037A		# CUIDADO! endereco deve estar alinhado pois armazenamos por store word
+PLAYER4.INITIAL.PIVO:	.word   0xFF003F9A		# CUIDADO! endereco deve estar alinhado pois armazenamos por store word
+PLAYER4.INIT.FIELD.PIVO:.word   0xFF003F86
 PLAYER4.CURRENT.PIVO:	.word	0
 PLAYER4.PAST.PIVO:	.word	0
 
@@ -242,6 +242,9 @@ PIECE.ARRAY.T.STATE4:	.word	0,0,1,0,
 .eqv	SQUARE.UNIT.SIZE	4		# 4x4 pixels Ao modificar tamanho e necessario atualizar matriz de enrderecos relativos
 						# e tambem ponto do pivo inicial da peca ao ser criada
 
+.eqv	COLLISION.BASE		0xFF012C00	# Para uma screen de 320x240 = 12C00
+#.eqv	COLLISION.BASE		0xFF000000	# Para uma screen de 320x240 = 12C00
+
 .eqv	SCREEN.ADRESS.INIT	0xFF000000
 .eqv	SCREEN.ADRESS.END	0xFF012C00	#320*240 + FF00_0000 modificar caso mude dimesnsoes
 .eqv	SCREEN.X		320
@@ -251,11 +254,13 @@ PIECE.ARRAY.T.STATE4:	.word	0,0,1,0,
 .eqv	FRAME.SIZE		20		# Largura das bordas
 .eqv	FIELD.SIZE		40		# Largura do campo navegavel
 
-.eqv	FIELD.SUP.LIM		0xFF003C00	# FF000000 + 320 * 16 -> 4 unidades(unity square) abaixo da parte de cima da tela
+# Limites coincidem com as bordas pretas do background
+.eqv	FIELD.SUP.LIM		0xFF003C00	# FF000000 + 320 * 48 -> 12 unidades(unity square) abaixo da parte de cima da tela
 .eqv	FIELD.INF.LIM		0xFF00F000	# FF012C00 - 320 * 16 -> 4 unidades(unity square) acima da parte de baixo da tela
 .eqv	COL.FIELD.SUP.LIM	0xFF014000	# FF012C00 + 320 * 16
-.eqv	COL.FIELD.INF.LIM	0xFF021340	# FF025800 - 320 * 16
+.eqv	COL.FIELD.INF.LIM	0xFF025800	# FF012C00 + 320 * 240
 
+.eqv	PIECES.SUP.LIM		0xFF004100	# Limite indica a partir de qual linha player ira perder
 
 .eqv	KEY.RIGHT		0x64
 .eqv	KEY.LEFT		0x61 
@@ -269,14 +274,42 @@ PIECE.ARRAY.T.STATE4:	.word	0,0,1,0,
 .eqv	COLOR.BLACK		0x00000000 	# necessario manter bits a mais ao inves de 0x00
 
 .text
-	jal 	draw.background
+	jal	initiate.game
 main:
 	jal	update.p1
-	#jal	update.p2
-	#jal	update.p3
-	#jal	update.p4
+	jal	update.p2
+	jal	update.p3
+	jal	update.p4
 	
 	j	main
+	
+	
+initiate.game:
+	addi 	$sp, $sp, -4
+	sw	$ra, 4($sp)
+
+	la	$a0, PLAYER1.INIT.FIELD.PIVO
+	lw	$a0, 0($a0)
+	jal	draw.lat.col
+	
+	la	$a0, PLAYER2.INIT.FIELD.PIVO
+	lw	$a0, 0($a0)
+	jal	draw.lat.col
+	
+	la	$a0, PLAYER3.INIT.FIELD.PIVO
+	lw	$a0, 0($a0)
+	jal	draw.lat.col
+	
+	la	$a0, PLAYER4.INIT.FIELD.PIVO
+	lw	$a0, 0($a0)
+	jal	draw.lat.col
+	
+	jal 	draw.background
+	
+	lw	$ra, 4($sp)
+	addi 	$sp, $sp, 4
+	
+	jr	$ra
 
 update.p1:
 	addi 	$sp, $sp, -4
@@ -932,6 +965,13 @@ update.p3:
 	addi	$a2, $zero, 1	
 	jal	update.piece.collision.matrix
 	
+	#Checamos se alguma linha foi preenchida
+	la	$a0, PLAYER3.PAST.PIVO		#possui pivo passado anterior a input e rotacao
+	la	$a1, PLAYER3.INIT.FIELD.PIVO
+	lw	$a0, 0($a0)
+	lw	$a1, 0($a1)
+	jal	check.row
+	
 	# Verificamos se pecas atingiram limite superior
 	beq	$v0, $zero, update.p3.not.lost
 	la	$t0, PLAYER3.LOST.FLAG 			#caso tenham perdido entao player perdeu
@@ -1153,6 +1193,13 @@ update.p4:
 	la	$a1, PLAYER4.PIECE.FORM	
 	addi	$a2, $zero, 1	
 	jal	update.piece.collision.matrix
+	
+	#Checamos se alguma linha foi preenchida
+	la	$a0, PLAYER4.PAST.PIVO		#possui pivo passado anterior a input e rotacao
+	la	$a1, PLAYER4.INIT.FIELD.PIVO
+	lw	$a0, 0($a0)
+	lw	$a1, 0($a1)
+	jal	check.row
 	
 	# Verificamos se pecas atingiram limite superior
 	beq	$v0, $zero, update.p4.not.lost
@@ -1385,8 +1432,7 @@ check.collision:#(a0 = adress) v0 = 1 colisao, v0 = 0 sem colisao
 	
 	#checar por pecas ja posicionadas
 	addi	$t0, $zero, SCREEN.ADRESS.INIT
-	la	$t1, COLLISION.BASE
-	lw	$t1, 0($t1)
+	addi	$t1, $zero, COLLISION.BASE
 	
 	sub	$t2, $a0, $t0		# distancia do inicio da tela ate ponto
 	add	$t0, $t1, $t2 		# para facilitar calculos matriz de colisao possui mesmo tamaanho que tela
@@ -1441,8 +1487,8 @@ update.piece.collision.matrix:#(a0 = pivo, $a1 = endereco inicial array, $a2 = 1
 		
 		add	$t5, $t4, $t0		#adicionamos ao pivo endereco da peca
 		
-		#Checamos se colisao ultrapassa limite inferior da tela
-		addi	$t4, $zero, FIELD.SUP.LIM
+		#Checamos se colisao ultrapassa limite superior estipulado
+		addi	$t4, $zero, PIECES.SUP.LIM
 		slt	$t4, $t5, $t4
 		bne	$t4, $zero, update.piece.out
 		
@@ -1484,8 +1530,7 @@ update.dot.collision.matrix:#(a0 = endereco a ser acrescentado na matriz de coli
 	sw	$t2, 8($sp)
 	
 	addi	$t0, $zero, SCREEN.ADRESS.INIT
-	la	$t1, COLLISION.BASE
-	lw	$t1, 0($t1)
+	addi	$t1, $zero, COLLISION.BASE
 	
 	sub	$t2, $a0, $t0		# distancia do inicio da tela ate ponto
 	add	$t0, $t1, $t2 		# para facilitar calculos matriz de colisao possui mesmo tamaanho que tela
@@ -1500,6 +1545,60 @@ update.dot.collision.matrix:#(a0 = endereco a ser acrescentado na matriz de coli
 	addi 	$sp, $sp, 12
 
 	jr	$ra
+
+# "Desenha" limites laterais de acordo com pivo do player e tamanho do campo (FIELD.WIDTH) 
+draw.lat.col:#(a0 = PLAYER.INIT.FIELD.PIVO)
+	addi 	$sp, $sp, -16
+	sw	$t0, 0($sp)
+	sw	$t1, 4($sp)
+	sw	$t2, 8($sp)
+	sw	$t3, 12($sp)
+	
+	addi	$t0, $zero, SCREEN.ADRESS.INIT
+	addi	$t1, $zero, COLLISION.BASE
+	
+	sub	$t2, $a0, $t0		# distancia do inicio da tela ate ponto
+	
+	# t0 - contem endereco inicial da coluna a esquerda 
+	add	$t0, $t1, $t2 		
+	addi	$t1, $zero, SQUARE.UNIT.SIZE
+	sub	$t0, $t0, $t1	
+	
+	# para calcular coluna a direita basta adicionar FIELD.WIDTH + 1 * SQUARE.UNIT.SIZE
+	addi	$t2, $zero, FIELD.WIDTH
+	addi	$t2, $t2, 1
+	mul	$t1, $t2, $t1		# (FIELD.WIDTH + 1) * SQUARE.UNIT.SIZE
+	add	$t1, $t0, $t1		# endereco coluna a esquerda + (FIELD.WIDTH + 1) * SQUARE.UNIT.SIZE
+	
+	# Faremos um loop para desenhar ate limite inferior da matriz de colisao
+	addi	$t2, $zero, COL.FIELD.INF.LIM
+	
+	draw.lat.col.lp1:
+		slt	$t3, $t0, $t2				# enquanto t0, for menor que limite inferior da matriz de colisao
+		beq	$t3, $zero, draw.lat.col.lp1.end
+		
+		addi	$t3, $zero, 1
+		sb	$t3, 0($t0)
+		sb	$t3, 0($t1)	
+		
+		# Adicionamos para proximo pivo abaixo
+		addi	$t3, $zero, SQUARE.UNIT.SIZE
+		addi	$t4, $zero, SCREEN.X
+		mul	$t3, $t4, $t3
+		
+		add	$t0, $t0 ,$t3
+		add	$t1, $t1 ,$t3
+		j	draw.lat.col.lp1
+	draw.lat.col.lp1.end:
+	
+	lw	$t0, 0($sp)
+	lw	$t1, 4($sp)
+	lw	$t2, 8($sp)
+	lw	$t3, 12($sp)
+	addi 	$sp, $sp, 16
+	
+	jr	$ra
+
 
 
 check.row:#(a0 = pivo da peca, a1 = pivo do inicio do campo)
@@ -1531,8 +1630,7 @@ check.row:#(a0 = pivo da peca, a1 = pivo do inicio do campo)
 	
 	# Tranformar para endereco da matriz de colisao
 	addi	$t2, $zero, SCREEN.ADRESS.INIT
-	la	$t1, COLLISION.BASE
-	lw	$t1, 0($t1)
+	addi	$t1, $zero, COLLISION.BASE
 	
 	sub	$t0, $t0, $t2	    		# Distancia do inicio da tela ate ponto
 	add	$t0, $t0, $t1 			# t0 = endereco para inicar verificao 
