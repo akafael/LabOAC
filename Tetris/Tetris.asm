@@ -8,26 +8,26 @@ TECLADO:		.word 	0xFF000004
 #PLAYER 1
 ####
 ####################################################################################################
-PLAYER1.TIMER.COUNT:	.word 	0 
-#PLAYER1.TIMER.END:	.word 	1000			# Tempo de espera varia com clock
-#PLAYER1.TIMER.END:	.word 	1			# Tempo de espera varia com clock
-PLAYER1.TIMER.END:	.word 	2000			# Tempo de espera varia com clock
+PLAYER1.TIMER.COUNT:	.word 	0 #0
+#PLAYER1.TIMER.END:	.word 	1000 #4			# Tempo de espera varia com clock
+#PLAYER1.TIMER.END:	.word 	1 #4			# Tempo de espera varia com clock
+PLAYER1.TIMER.END:	.word 	2000 #4			# Tempo de espera varia com clock
 
 
-PLAYER1.NEWPIECE.FLAG:	.word   1
-PLAYER1.DRAW.FLAG:	.word   1
-PLAYER1.LOST.FLAG:	.word   0
+PLAYER1.NEWPIECE.FLAG:	.word   1 #8
+PLAYER1.DRAW.FLAG:	.word   1 #12
+PLAYER1.LOST.FLAG:	.word   0 #16
 
-PLAYER1.INITIAL.PIVO:	.word   0xFF003EAA		# CUIDADO! endereco deve estar alinhado pois armazenamos por store word
-PLAYER1.INIT.FIELD.PIVO:.word   0xFF003E96		# 320 * 50 + 20(pixels antes de começar campo) + 2
-PLAYER1.CURRENT.PIVO:	.word	0			 
-PLAYER1.PAST.PIVO:	.word	0 
+PLAYER1.INITIAL.PIVO:	.word   0xFF003EAA #20		# CUIDADO! endereco deve estar alinhado pois armazenamos por store word
+PLAYER1.INIT.FIELD.PIVO:.word   0xFF003E96 #24		# 320 * 50 + 20(pixels antes de começar campo) + 2
+PLAYER1.CURRENT.PIVO:	.word	0 #28 
+PLAYER1.PAST.PIVO:	.word	0 #32
 
-PLAYER1.CURRENT.TYPE:	.word 	0x00000007
-PLAYER1.CURRENT.STATE:	.word 	0x00000001
+PLAYER1.CURRENT.TYPE:	.word 	0x00000007 # 36
+PLAYER1.CURRENT.STATE:	.word 	0x00000001 # 40
 
-PLAYER1.PIECE.FORM:	.word	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 
-PLAYER1.PAST.FORM:	.word	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0	
+PLAYER1.PIECE.FORM:	.word	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 # 44 
+PLAYER1.PAST.FORM:	.word	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0	# 108
 	
 ####
 #PLAYER 2
@@ -276,13 +276,16 @@ PIECE.ARRAY.T.STATE4:	.word	0,0,1,0,
 .text
 	jal	initiate.game
 main:
-	jal	update.p1
-	jal	update.p2
-	jal	update.p3
-	jal	update.p4
+	la	$a0, PLAYER1.TIMER.COUNT
+	jal	update.p
+	la	$a0, PLAYER2.TIMER.COUNT
+	jal	update.p
+	la	$a0, PLAYER3.TIMER.COUNT
+	jal	update.p
+	la	$a0, PLAYER4.TIMER.COUNT
+	jal	update.p
 	
 	j	main
-	
 	
 initiate.game:
 	addi 	$sp, $sp, -4
@@ -311,19 +314,22 @@ initiate.game:
 	
 	jr	$ra
 
-update.p1:
-	addi 	$sp, $sp, -4
-	sw	$ra, 4($sp)
+update.p:# (a0 = PLAYERX.TIMER.COUNT) Mapeamento em relacao
+	addi 	$sp, $sp, -8
+	sw	$ra, 0($sp)
+	sw	$s4, 4($sp)
+	
+	add	$s4, $zero, $a0		# s4 = PLAYERX.TIMER.COUNT
 	
 	#checamos se player ja perdeu 
-	la	$t0, PLAYER1.LOST.FLAG
-	lw	$t0, 0($t0)
-	bne	$t0, $zero, update.p1.end	# caso tenha perdido pulamos para end
+	addi	$t0, $s4, 16			# PLAYER1.LOST.FLAG
+	lw	$t0, 0($t0) 			
+	bne	$t0, $zero, update.p.end	# caso tenha perdido pulamos para end
 
 	#checamos se flag de nova peca esta ativa
-	la	$t0, PLAYER1.NEWPIECE.FLAG
-	lw	$t0, 0($t0)
-	beq	$t0, $zero, update.p1.draw
+	addi	$t0, $s4, 8			# PLAYER1.NEWPIECE.FLAG
+	lw	$t0, 0($t0)	
+	beq	$t0, $zero, update.p.draw
 	
 	######
 	# INICIALIZACAO DA PECA
@@ -331,58 +337,59 @@ update.p1:
 	######################################################################################
 	# Caso a flag sinalize vamos sortear nova peca e reiniciar pivo
 	# randomizar uma peca 0 a 6
-	update.p1.rand:
+	update.p.rand:
 	li 	$v0, 42  
 	li 	$a1, 6 
 	syscall     
 	add	$a0, $a0, 1
 	
-	la	$t0, PLAYER1.CURRENT.TYPE
-	la	$t1, PLAYER1.CURRENT.STATE
+	addi	$t0, $s4, 36		# PLAYER1.CURRENT.TYPE
+	addi	$t1, $s4, 40		# PLAYER1.CURRENT.STATE
 	
-	sw	$a0, 0($t0)		# current piece 
+	sw	$a0, 0($t0)		
 	addi	$a0, $zero, 1
-	sw	$a0, 0($t1)		# current sate  
+	sw	$a0, 0($t1)		 
 	
 	# Reiniciar pivo da peca
-	update.p1.pivo:
-	la	$t1, PLAYER1.CURRENT.PIVO
-	la	$t0, PLAYER1.INITIAL.PIVO
-	lw	$t0, 0($t0)  			# Pivo do player 1
+	update.p.pivo:
+	addi	$t0, $s4, 20			# PLAYER1.INITIAL.PIVO
+	addi	$t1, $s4, 28 			# PLAYER1.CURRENT.PIVO
+	lw	$t0, 0($t0)  			# Pivo do player 1 
 	sw	$t0, 0($t1)			# Armazenamos novo pivo
 	
-	la	$a0, PLAYER1.PIECE.FORM		# rotaciona apenas para popular array form 
-	la      $a1, PLAYER1.CURRENT.TYPE
-	la	$a2, PLAYER1.CURRENT.STATE
+	# rotaciona apenas para popular array form 
+	addi	$a0, $s4, 44  			# PLAYER1.PIECE.FORM		
+	addi    $a1, $s4, 36 			# PLAYER1.CURRENT.TYPE
+	addi	$a2, $s4, 40			# PLAYER1.CURRENT.STATE
 	addi	$t1, $zero, PIECE.STATE4
 	sw	$t1, 0($a2)			# Jogamos valor da peca para estado 4, para ao rotacionar ir sempre para estado 1
 	jal	rotate.piece			# peca inicial esta sendo setada diretamente na memoria
 	
-	la	$t1, PLAYER1.NEWPIECE.FLAG
-	sw	$zero, 0($t1)			#abaixamos a flag
+	addi	$t1, $s4, 8 			# PLAYER1.NEWPIECE.FLAG	
+	sw	$zero, 0($t1)			# abaixamos a flag
 	##########################################################################################
 	
-	update.p1.draw:
-	la	$t1, PLAYER1.DRAW.FLAG		
-	lw	$t1, 0($t1)
-	beq	$t1, $zero, update.p1.check.count 	# caso nao possa atualizar pulamos para contagem	
+	update.p.draw:
+	addi	$t1, $s4, 12 			# PLAYER1.DRAW.FLAG		
+	lw	$t1, 0($t1)			
+	beq	$t1, $zero, update.p.check.count 	# caso nao possa atualizar pulamos para contagem	
 	
 	#####
 	# DESENHAR PECA E PEGAR INPUTS
 	#####
 	##########################################################################################
 	# Jogamos pivo para t0
-	la	$t0, PLAYER1.CURRENT.PIVO
+	addi	$t0, $s4, 28 			# PLAYER1.CURRENT.PIVO
 	lw	$t0, 0($t0)			# Endereco do pivo 
 	
 	#desenhamos peca
 	add	$a0, $zero, $t0			# Endereco do pivo 
 	add	$a1, $zero, COLOR.RED		# Cor para desenhar
-	la	$a2, PLAYER1.PIECE.FORM		# Qual forma sera desenhada
+	addi	$a2, $s4, 44 			# PLAYER1.PIECE.FORM	# Qual forma sera desenhada
 	jal 	draw.piece
 	
 	#salvamos posicao passada para apagar peca ou desenha fixa			 
-	la	$t1, PLAYER1.PAST.PIVO
+	addi	$t1, $s4, 32 			# PLAYER1.PAST.PIVO
 	sw	$t0, 0($t1)			# Armazenamos pivo atual para pivo passado
 	
 	#Acrscenta movimento para baixo em $t0
@@ -391,8 +398,8 @@ update.p1:
 	add	$t0, $t0, $t1			# t0 = proxima posicao
 	
 	#salvamos possicao passada e array passado
-	la	$a0, PLAYER1.PAST.FORM		# array past = array form
-	la	$a1, PLAYER1.PIECE.FORM	
+	addi	$a0, $s4, 108			# PLAYER1.PAST.FORM		# array past = array form
+	addi	$a1, $s4, 44			# PLAYER1.PIECE.FORM	
 	jal	copy.array
 	
 	#Pegar input e acrescentamos em $t0
@@ -401,7 +408,7 @@ update.p1:
 	add 	$t0 , $t0, $v0			#acrescenta input
 	
 	#v1 recebe rotacao
-	beq	$v1, $zero, update.p1.no.use.rotation
+	beq	$v1, $zero, update.p.no.use.rotation
 	############################################################################################
 	
 	####
@@ -411,70 +418,70 @@ update.p1:
 	#Caso ocorra requerimento de rotacao copiamos estado atual para temporario e validamos
 	#Se for valido entao copiamos array temporario para atual
 	la	$a0, PIECE.ARRAY.TEMP.FORM
-	la	$a1, PLAYER1.PIECE.FORM
+	addi	$a1, $s4, 44				# PLAYER1.PIECE.FORM
 	jal	copy.array
 	
 	#rotacionamos array
 	la	$a0, PIECE.ARRAY.TEMP.FORM
-	la      $a1, PLAYER1.CURRENT.TYPE
-	la	$a2, PLAYER1.CURRENT.STATE
+	addi    $a1, $s4, 36				# PLAYER1.CURRENT.TYPE
+	addi	$a2, $s4, 40				# PLAYER1.CURRENT.STATE
 	jal	rotate.piece
 	
 	#Checamos se ocorre colisao 
 	la	$a1, PIECE.ARRAY.TEMP.FORM
 	add	$a0, $zero, $t0 
 	jal	check.collision.piece
-	bne	$v0, $zero, update.p1.no.use.rotation
+	bne	$v0, $zero, update.p.no.use.rotation
 	
 	#Se passou no teste de colisoes atualizamos array form
-	la	$a0, PLAYER1.PIECE.FORM
+	addi	$a0, $s4, 44				# PLAYER1.PIECE.FORM
 	la	$a1, PIECE.ARRAY.TEMP.FORM
 	jal	copy.array
-	j	update.p1.save.pivo		#esta ok pulamos direto para contagem	
+	j	update.p.save.pivo		#esta ok pulamos direto para contagem	
 	#######################################################################################
 	
 	######################################################################################
-	update.p1.no.use.rotation:
+	update.p.no.use.rotation:
 	#checamos se apos acrscentar movimento para baixo + input ocorre colisao por lateral
-	la	$a1, PLAYER1.PIECE.FORM
+	addi	$a1, $s4, 44 				# PLAYER1.PIECE.FORM
 	add	$a0, $zero, $t0 
 	jal	check.collision.piece
-	beq	$v0, $zero, update.p1.use.input
-	update.p1.dont.use.input:			#caso ocorra colisao lateral em qualquer quadrado unitario
+	beq	$v0, $zero, update.p.use.input
+	update.p.dont.use.input:			#caso ocorra colisao lateral em qualquer quadrado unitario
 	add	$t0, $zero, $s1				#e conferir se ocorre colisao por baixo 
-	update.p1.use.input:#input ja foi acrescido em t0
+	update.p.use.input:#input ja foi acrescido em t0
 	
 	#checamos se apos acrscentar movimento para baixo com ou sem input se ocorre colisao por baixo 
-	la	$a1, PLAYER1.PIECE.FORM
+	addi	$a1, $s4, 44 				# PLAYER1.PIECE.FORM
 	add	$a0, $zero, $t0 
 	jal	check.collision.piece
-	bne	$v0, $zero, update.p1.draw.static		# pulamos imediatamente para peca estatica
+	bne	$v0, $zero, update.p.draw.static		# pulamos imediatamente para peca estatica
 	##########################################################################################
 	
-	update.p1.save.pivo:
-	la	$t1, PLAYER1.CURRENT.PIVO		#gurdamos novo pivo com inputs e acrescimos
-	sw	$t0, 0($t1)			
+	update.p.save.pivo:
+	addi	$t1, $s4, 28 		# PLAYER1.CURRENT.PIVO		#gurdamos novo pivo com inputs e acrescimos
+	sw	$t0, 0($t1)		
 	
 	#setamos uma flag para nao fazer update na peca apenas apos a contagem
-	la	$t0, PLAYER1.DRAW.FLAG		
-	sw	$zero, 0($t0)	
+	addi	$t0, $s4, 12 				# PLAYER1.DRAW.FLAG		
+	sw	$zero, 0($t0)				
 	
 	######
 	# CONTAGEM EM STANDBY
 	######
 	###########################################################################################
 	# Contagem para atualizar peca
-	update.p1.check.count:
-	la	$t0, PLAYER1.TIMER.COUNT
-	la	$t1, PLAYER1.TIMER.END
-	lw	$t2, 0($t0)			# t2 = contador
-	lw	$t3, 0($t1)			# t3 = final da contagem
-	update.p1.lp1:
-		beq 	$t2, $t3, update.p1.lp1.end
+	update.p.check.count:
+	addi	$t0, $s4, 0 			# PLAYER1.TIMER.COUNT
+	addi	$t1, $s4, 4			# PLAYER1.TIMER.END
+	lw	$t2, 0($t0)			# PLAYER1.TIMER.COUNT	# t2 = contador
+	lw	$t3, 0($t1)			# PLAYER1.TIMER.END	# t3 = final da contagem
+	update.p.lp1:
+		beq 	$t2, $t3, update.p.lp1.end
 		addi	$t2, $t2, 1
 		sw	$t2, 0($t0)		#armazena contagem
-		j	update.p1.end		#terminamos update
-	update.p1.lp1.end:
+		j	update.p.end		#terminamos update
+	update.p.lp1.end:
 	sw	$zero, 0($t0)		#reiniciamos contador
 	###########################################################################################
 	
@@ -482,19 +489,19 @@ update.p1:
 	# APAGAR PECA
 	###########
 	#apagar quadrado passado
-	update.p1.piece.erase:
-	la	$t0, PLAYER1.PAST.PIVO		#possui pivo passado anterior a input e rotacao
-	lw	$a0, 0($t0)	
+	update.p.piece.erase:
+	addi	$t0, $s4, 32 			# PLAYER1.PAST.PIVO# possui pivo passado anterior a input e rotacao
+	lw	$a0, 0($t0)			# PLAYER1.PAST.PIVO
 	addi 	$a1, $zero, COLOR.WHITE
-	la	$a2, PLAYER1.PAST.FORM
+	addi	$a2, $s4, 108			# PLAYER1.PAST.FORM
 	jal 	draw.piece
 	
 	#permitimos que peca seja desenhada novamente
-	la	$t0, PLAYER1.DRAW.FLAG		
+	addi	$t0, $s4, 12 			# PLAYER1.DRAW.FLAG		
 	addi	$t1, $zero, 1			 
-	sw	$t1, 0($t0)	
+	sw	$t1, 0($t0)				
 	
-	j	update.p1.end				# retornamos para main para proximo update
+	j	update.p.end				# retornamos para main para proximo update
 	#############################################################################################
 	
 	###########
@@ -502,729 +509,44 @@ update.p1:
 	###########
 	#############################################################################################
 	#Atualizamos matriz de colisao caso peca nao possa mais mover
-	update.p1.draw.static:
-	la	$t0, PLAYER1.PAST.PIVO		#possui pivo passado anterior a input e rotacao
-	lw	$a0, 0($t0)	
-	la	$a1, PLAYER1.PIECE.FORM	
+	update.p.draw.static:
+	addi	$t0, $s4, 32 			# PLAYER1.PAST.PIVO #possui pivo passado anterior a input e rotacao
+	lw	$a0, 0($t0)			# PLAYER1.PAST.PIVO
+	addi	$a1, $s4, 108			# PLAYER1.PIECE.FORM	
 	addi	$a2, $zero, 1	
 	jal	update.piece.collision.matrix
 	
 	#Checamos se alguma linha foi preenchida
-	la	$a0, PLAYER1.PAST.PIVO		#possui pivo passado anterior a input e rotacao
-	la	$a1, PLAYER1.INIT.FIELD.PIVO
-	lw	$a0, 0($a0)
-	lw	$a1, 0($a1)
+	#la	$a0, PLAYER1.PAST.PIVO		#possui pivo passado anterior a input e rotacao
+	#la	$a1, PLAYER1.INIT.FIELD.PIVO
+	lw	$a0, 32($s4)			# PLAYER1.PAST.PIVO	
+	lw	$a1, 24($s4)			# PLAYER1.INIT.FIELD.PIVO
 	jal	check.row
 	
 	# Verificamos se pecas atingiram limite superior
-	beq	$v0, $zero, update.p1.not.lost
-	la	$t0, PLAYER1.LOST.FLAG 			#caso tenham perdido entao player perdeu
+	beq	$v0, $zero, update.p.not.lost
+	addi	$t0, $s4, 16 			# PLAYER1.LOST.FLAG #caso tenham perdido entao player perdeu
 	addi	$t1, $zero, 1
-	sw	$t1, 0($t0)
-	update.p1.not.lost:
+	sw	$t1, 0($t0)			# PLAYER1.LOST.FLAG
+	update.p.not.lost:
 	
 	#permitimos criacao de nova peca
-	la	$t0, PLAYER1.NEWPIECE.FLAG
+	addi	$t0, $s4, 8 			# PLAYER1.NEWPIECE.FLAG
 	addi	$t1, $zero , 1
-	sw	$t1, 0($t0)
+	sw	$t1, 0($t0)		
 	
 	#e permitimos que peca seja desenhada novamente
-	la	$t0, PLAYER1.DRAW.FLAG		
+	addi	$t0, $s4, 12			# PLAYER1.DRAW.FLAG		
 	addi	$t1, $zero, 1			 
-	sw	$t1, 0($t0)	
-	
-	update.p1.end:
-	lw	$ra, 4($sp)
-	addi 	$sp, $sp, 4
-	
-	jr	$ra
-
-update.p2:
-	addi 	$sp, $sp, -4
-	sw	$ra, 4($sp)
-	
-	#checamos se player ja perdeu 
-	la	$t0, PLAYER2.LOST.FLAG
-	lw	$t0, 0($t0)
-	bne	$t0, $zero, update.p2.end	# caso tenha perdido pulamos para end
-
-	#checamos se flag de nova peca esta ativa
-	la	$t0, PLAYER2.NEWPIECE.FLAG
-	lw	$t0, 0($t0)
-	beq	$t0, $zero, update.p2.draw
-	
-	######
-	# INICIALIZACAO DA PECA
-	######
-	######################################################################################
-	# Caso a flag sinalize vamos sortear nova peca e reiniciar pivo
-	# randomizar uma peca 0 a 6
-	update.p2.rand:
-	li 	$v0, 42  
-	li 	$a1, 6 
-	syscall     
-	add	$a0, $a0, 1
-	
-	la	$t0, PLAYER2.CURRENT.TYPE
-	la	$t1, PLAYER2.CURRENT.STATE
-	
-	sw	$a0, 0($t0)		# current piece 
-	addi	$a0, $zero, 1
-	sw	$a0, 0($t1)		# current sate  
-	
-	# Reiniciar pivo da peca
-	update.p2.pivo:
-	la	$t1, PLAYER2.CURRENT.PIVO
-	la	$t0, PLAYER2.INITIAL.PIVO
-	lw	$t0, 0($t0) 			
-	sw	$t0, 0($t1)			# Armazenamos novo pivo
-	
-	la	$a0, PLAYER2.PIECE.FORM		# rotaciona apenas para popular array form 
-	la      $a1, PLAYER2.CURRENT.TYPE
-	la	$a2, PLAYER2.CURRENT.STATE
-	addi	$t1, $zero, PIECE.STATE4
-	sw	$t1, 0($a2)			# Jogamos valor da peca para estado 4, para ao rotacionar ir sempre para estado 1
-	jal	rotate.piece			# peca inicial esta sendo setada diretamente na memoria
-	
-	la	$t1, PLAYER2.NEWPIECE.FLAG
-	sw	$zero, 0($t1)			#abaixamos a flag
-	##########################################################################################
-	
-	update.p2.draw:
-	la	$t1, PLAYER2.DRAW.FLAG		
-	lw	$t1, 0($t1)
-	beq	$t1, $zero, update.p2.check.count 	# caso nao possa atualizar pulamos para contagem	
-	
-	#####
-	# DESENHAR PECA E PEGAR INPUTS
-	#####
-	##########################################################################################
-	# Jogamos pivo para t0
-	la	$t0, PLAYER2.CURRENT.PIVO
-	lw	$t0, 0($t0)			# Endereco do pivo 
-	
-	#desenhamos peca
-	add	$a0, $zero, $t0			# Endereco do pivo 
-	add	$a1, $zero, COLOR.BLUE		# Cor para desenhar
-	la	$a2, PLAYER2.PIECE.FORM		# Qual forma sera desenhada
-	jal 	draw.piece
-	
-	#salvamos posicao passada para apagar peca ou desenha fixa			 
-	la	$t1, PLAYER2.PAST.PIVO
-	sw	$t0, 0($t1)			# Armazenamos pivo atual para pivo passado
-	
-	#Acrscenta movimento para baixo em $t0
-	add 	$t1, $zero, SQUARE.UNIT.SIZE
-	mul	$t1, $t1, SCREEN.X
-	add	$t0, $t0, $t1			# t0 = proxima posicao
-	
-	#salvamos possicao passada e array passado
-	la	$a0, PLAYER2.PAST.FORM		# array past = array form
-	la	$a1, PLAYER2.PIECE.FORM	
-	jal	copy.array
-	
-	#Pegar input e acrescentamos em $t0
-	jal 	get.input
-	add	$s1, $zero, $t0			# $s1 = posicao anteior ao input mas acrescido de movimento para baixo
-	add 	$t0 , $t0, $v0			#acrescenta input
-	
-	#v1 recebe rotacao
-	beq	$v1, $zero, update.p2.no.use.rotation
-	############################################################################################
-	
-	####
-	# VALIDACAO DE ROTACAO
-	####
-	############################################################################################
-	#Caso ocorra requerimento de rotacao copiamos estado atual para temporario e validamos
-	#Se for valido entao copiamos array temporario para atual
-	la	$a0, PIECE.ARRAY.TEMP.FORM
-	la	$a1, PLAYER2.PIECE.FORM
-	jal	copy.array
-	
-	#rotacionamos array
-	la	$a0, PIECE.ARRAY.TEMP.FORM
-	la      $a1, PLAYER2.CURRENT.TYPE
-	la	$a2, PLAYER2.CURRENT.STATE
-	jal	rotate.piece
-	
-	#Checamos se ocorre colisao 
-	la	$a1, PIECE.ARRAY.TEMP.FORM
-	add	$a0, $zero, $t0 
-	jal	check.collision.piece
-	bne	$v0, $zero, update.p2.no.use.rotation
-	
-	#Se passou no teste de colisoes atualizamos array form
-	la	$a0, PLAYER2.PIECE.FORM
-	la	$a1, PIECE.ARRAY.TEMP.FORM
-	jal	copy.array
-	j	update.p2.save.pivo		#esta ok pulamos direto para contagem	
-	#######################################################################################
-	
-	######################################################################################
-	update.p2.no.use.rotation:
-	#checamos se apos acrscentar movimento para baixo + input ocorre colisao por lateral
-	la	$a1, PLAYER2.PIECE.FORM
-	add	$a0, $zero, $t0 
-	jal	check.collision.piece
-	beq	$v0, $zero, update.p2.use.input
-	update.p2.dont.use.input:			#caso ocorra colisao lateral em qualquer quadrado unitario
-	add	$t0, $zero, $s1				#e conferir se ocorre colisao por baixo 
-	update.p2.use.input:#input ja foi acrescido em t0
-	
-	#checamos se apos acrscentar movimento para baixo com ou sem input se ocorre colisao por baixo 
-	la	$a1, PLAYER2.PIECE.FORM
-	add	$a0, $zero, $t0 
-	jal	check.collision.piece
-	bne	$v0, $zero, update.p2.draw.static		# pulamos imediatamente para peca estatica
-	##########################################################################################
-	
-	update.p2.save.pivo:
-	la	$t1, PLAYER2.CURRENT.PIVO		#gurdamos novo pivo com inputs e acrescimos
-	sw	$t0, 0($t1)			
-	
-	#setamos uma flag para nao fazer update na peca apenas apos a contagem
-	la	$t0, PLAYER2.DRAW.FLAG		
-	sw	$zero, 0($t0)	
-	
-	######
-	# CONTAGEM EM STANDBY
-	######
-	###########################################################################################
-	# Contagem para atualizar peca
-	update.p2.check.count:
-	la	$t0, PLAYER2.TIMER.COUNT
-	la	$t1, PLAYER2.TIMER.END
-	lw	$t2, 0($t0)			# t2 = contador
-	lw	$t3, 0($t1)			# t3 = final da contagem
-	update.p2.lp1:
-		beq 	$t2, $t3, update.p2.lp1.end
-		addi	$t2, $t2, 1
-		sw	$t2, 0($t0)		#armazena contagem
-		j	update.p2.end		#terminamos update
-	update.p2.lp1.end:
-	sw	$zero, 0($t0)		#reiniciamos contador
-	###########################################################################################
-	
-	###########
-	# APAGAR PECA
-	###########
-	#apagar quadrado passado
-	update.p2.piece.erase:
-	la	$t0, PLAYER2.PAST.PIVO		#possui pivo passado anterior a input e rotacao
-	lw	$a0, 0($t0)	
-	addi 	$a1, $zero, COLOR.WHITE
-	la	$a2, PLAYER2.PAST.FORM
-	jal 	draw.piece
-	
-	#permitimos que peca seja desenhada novamente
-	la	$t0, PLAYER2.DRAW.FLAG		
-	addi	$t1, $zero, 1			 
-	sw	$t1, 0($t0)	
-	
-	j	update.p2.end				# retornamos para main para proximo update
-	#############################################################################################
-	
-	###########
-	# ATUALIZAR COLISAO
-	###########
-	#############################################################################################
-	#Atualizamos matriz de colisao caso peca nao possa mais mover
-	update.p2.draw.static:
-	la	$t0, PLAYER2.PAST.PIVO		#possui pivo passado anterior a input e rotacao
-	lw	$a0, 0($t0)	
-	la	$a1, PLAYER2.PIECE.FORM	
-	addi	$a2, $zero, 1	
-	jal	update.piece.collision.matrix	#Tambem checa por colisao superior caso player tenha perdido
-	
-	#Checamos se alguma linha foi preenchida
-	la	$a0, PLAYER2.PAST.PIVO		#possui pivo passado anterior a input e rotacao
-	la	$a1, PLAYER2.INIT.FIELD.PIVO
-	lw	$a0, 0($a0)
-	lw	$a1, 0($a1)
-	jal	check.row
-	
-	# Verificamos se pecas atingiram limite superior
-	beq	$v0, $zero, update.p2.not.lost
-	la	$t0, PLAYER2.LOST.FLAG 			#caso tenham perdido entao player perdeu
-	addi	$t1, $zero, 1
-	sw	$t1, 0($t0)
-	update.p2.not.lost:
-	
-	#permitimos criacao de nova peca
-	la	$t0, PLAYER2.NEWPIECE.FLAG
-	addi	$t1, $zero , 1
-	sw	$t1, 0($t0)
-	
-	#e permitimos que peca seja desenhada novamente
-	la	$t0, PLAYER2.DRAW.FLAG		
-	addi	$t1, $zero, 1			 
-	sw	$t1, 0($t0)	
-	
-	update.p2.end:
-	lw	$ra, 4($sp)
-	addi 	$sp, $sp, 4
-	
-	jr	$ra
-
-update.p3:
-	addi 	$sp, $sp, -4
-	sw	$ra, 4($sp)
-	
-	#checamos se player ja perdeu 
-	la	$t0, PLAYER3.LOST.FLAG
-	lw	$t0, 0($t0)
-	bne	$t0, $zero, update.p3.end	# caso tenha perdido pulamos para end
-
-	#checamos se flag de nova peca esta ativa
-	la	$t0, PLAYER3.NEWPIECE.FLAG
-	lw	$t0, 0($t0)
-	beq	$t0, $zero, update.p3.draw
-	
-	######
-	# INICIALIZACAO DA PECA
-	######
-	######################################################################################
-	# Caso a flag sinalize vamos sortear nova peca e reiniciar pivo
-	# randomizar uma peca 0 a 6
-	update.p3.rand:
-	li 	$v0, 42  
-	li 	$a1, 6 
-	syscall     
-	add	$a0, $a0, 1
-	
-	la	$t0, PLAYER3.CURRENT.TYPE
-	la	$t1, PLAYER3.CURRENT.STATE
-	
-	sw	$a0, 0($t0)		# current piece 
-	addi	$a0, $zero, 1
-	sw	$a0, 0($t1)		# current sate  
-	
-	# Reiniciar pivo da peca
-	update.p3.pivo:
-	la	$t1, PLAYER3.CURRENT.PIVO
-	la	$t0, PLAYER3.INITIAL.PIVO
-	lw	$t0, 0($t0) 		# Pivo do player 1
-	sw	$t0, 0($t1)			# Armazenamos novo pivo
-	
-	la	$a0, PLAYER3.PIECE.FORM		# rotaciona apenas para popular array form 
-	la      $a1, PLAYER3.CURRENT.TYPE
-	la	$a2, PLAYER3.CURRENT.STATE
-	addi	$t1, $zero, PIECE.STATE4
-	sw	$t1, 0($a2)			# Jogamos valor da peca para estado 4, para ao rotacionar ir sempre para estado 1
-	jal	rotate.piece			# peca inicial esta sendo setada diretamente na memoria
-	
-	la	$t1, PLAYER3.NEWPIECE.FLAG
-	sw	$zero, 0($t1)			#abaixamos a flag
-	##########################################################################################
-	
-	update.p3.draw:
-	la	$t1, PLAYER3.DRAW.FLAG		
-	lw	$t1, 0($t1)
-	beq	$t1, $zero, update.p3.check.count 	# caso nao possa atualizar pulamos para contagem	
-	
-	#####
-	# DESENHAR PECA E PEGAR INPUTS
-	#####
-	##########################################################################################
-	# Jogamos pivo para t0
-	la	$t0, PLAYER3.CURRENT.PIVO
-	lw	$t0, 0($t0)			# Endereco do pivo 
-	
-	#desenhamos peca
-	add	$a0, $zero, $t0			# Endereco do pivo 
-	add	$a1, $zero, COLOR.GREEN		# Cor para desenhar
-	la	$a2, PLAYER3.PIECE.FORM		# Qual forma sera desenhada
-	jal 	draw.piece
-	
-	#salvamos posicao passada para apagar peca ou desenha fixa			 
-	la	$t1, PLAYER3.PAST.PIVO
-	sw	$t0, 0($t1)			# Armazenamos pivo atual para pivo passado
-	
-	#Acrscenta movimento para baixo em $t0
-	add 	$t1, $zero, SQUARE.UNIT.SIZE
-	mul	$t1, $t1, SCREEN.X
-	add	$t0, $t0, $t1			# t0 = proxima posicao
-	
-	#salvamos possicao passada e array passado
-	la	$a0, PLAYER3.PAST.FORM		# array past = array form
-	la	$a1, PLAYER3.PIECE.FORM	
-	jal	copy.array
-	
-	#Pegar input e acrescentamos em $t0
-	jal 	get.input
-	add	$s1, $zero, $t0			# $s1 = posicao anteior ao input mas acrescido de movimento para baixo
-	add 	$t0 , $t0, $v0			#acrescenta input
-	
-	#v1 recebe rotacao
-	beq	$v1, $zero, update.p3.no.use.rotation
-	############################################################################################
-	
-	####
-	# VALIDACAO DE ROTACAO
-	####
-	############################################################################################
-	#Caso ocorra requerimento de rotacao copiamos estado atual para temporario e validamos
-	#Se for valido entao copiamos array temporario para atual
-	la	$a0, PIECE.ARRAY.TEMP.FORM
-	la	$a1, PLAYER3.PIECE.FORM
-	jal	copy.array
-	
-	#rotacionamos array
-	la	$a0, PIECE.ARRAY.TEMP.FORM
-	la      $a1, PLAYER3.CURRENT.TYPE
-	la	$a2, PLAYER3.CURRENT.STATE
-	jal	rotate.piece
-	
-	#Checamos se ocorre colisao 
-	la	$a1, PIECE.ARRAY.TEMP.FORM
-	add	$a0, $zero, $t0 
-	jal	check.collision.piece
-	bne	$v0, $zero, update.p3.no.use.rotation
-	
-	#Se passou no teste de colisoes atualizamos array form
-	la	$a0, PLAYER3.PIECE.FORM
-	la	$a1, PIECE.ARRAY.TEMP.FORM
-	jal	copy.array
-	j	update.p3.save.pivo		#esta ok pulamos direto para contagem	
-	#######################################################################################
-	
-	######################################################################################
-	update.p3.no.use.rotation:
-	#checamos se apos acrscentar movimento para baixo + input ocorre colisao por lateral
-	la	$a1, PLAYER3.PIECE.FORM
-	add	$a0, $zero, $t0 
-	jal	check.collision.piece
-	beq	$v0, $zero, update.p3.use.input
-	update.p3.dont.use.input:			#caso ocorra colisao lateral em qualquer quadrado unitario
-	add	$t0, $zero, $s1				#e conferir se ocorre colisao por baixo 
-	update.p3.use.input:#input ja foi acrescido em t0
-	
-	#checamos se apos acrscentar movimento para baixo com ou sem input se ocorre colisao por baixo 
-	la	$a1, PLAYER3.PIECE.FORM
-	add	$a0, $zero, $t0 
-	jal	check.collision.piece
-	bne	$v0, $zero, update.p3.draw.static		# pulamos imediatamente para peca estatica
-	##########################################################################################
-	
-	update.p3.save.pivo:
-	la	$t1, PLAYER3.CURRENT.PIVO		#gurdamos novo pivo com inputs e acrescimos
-	sw	$t0, 0($t1)			
-	
-	#setamos uma flag para nao fazer update na peca apenas apos a contagem
-	la	$t0, PLAYER3.DRAW.FLAG		
-	sw	$zero, 0($t0)	
-	
-	######
-	# CONTAGEM EM STANDBY
-	######
-	###########################################################################################
-	# Contagem para atualizar peca
-	update.p3.check.count:
-	la	$t0, PLAYER3.TIMER.COUNT
-	la	$t1, PLAYER3.TIMER.END
-	lw	$t2, 0($t0)			# t2 = contador
-	lw	$t3, 0($t1)			# t3 = final da contagem
-	update.p3.lp1:
-		beq 	$t2, $t3, update.p3.lp1.end
-		addi	$t2, $t2, 1
-		sw	$t2, 0($t0)		#armazena contagem
-		j	update.p3.end		#terminamos update
-	update.p3.lp1.end:
-	sw	$zero, 0($t0)		#reiniciamos contador
-	###########################################################################################
-	
-	###########
-	# APAGAR PECA
-	###########
-	#apagar quadrado passado
-	update.p3.piece.erase:
-	la	$t0, PLAYER3.PAST.PIVO		#possui pivo passado anterior a input e rotacao
-	lw	$a0, 0($t0)	
-	addi 	$a1, $zero, COLOR.WHITE
-	la	$a2, PLAYER3.PAST.FORM
-	jal 	draw.piece
-	
-	#permitimos que peca seja desenhada novamente
-	la	$t0, PLAYER3.DRAW.FLAG		
-	addi	$t1, $zero, 1			 
-	sw	$t1, 0($t0)	
-	
-	j	update.p3.end				# retornamos para main para proximo update
-	#############################################################################################
-	
-	###########
-	# ATUALIZAR COLISAO
-	###########
-	#############################################################################################
-	#Atualizamos matriz de colisao caso peca nao possa mais mover
-	update.p3.draw.static:
-	la	$t0, PLAYER3.PAST.PIVO		#possui pivo passado anterior a input e rotacao
-	lw	$a0, 0($t0)	
-	la	$a1, PLAYER3.PIECE.FORM	
-	addi	$a2, $zero, 1	
-	jal	update.piece.collision.matrix
-	
-	#Checamos se alguma linha foi preenchida
-	la	$a0, PLAYER3.PAST.PIVO		#possui pivo passado anterior a input e rotacao
-	la	$a1, PLAYER3.INIT.FIELD.PIVO
-	lw	$a0, 0($a0)
-	lw	$a1, 0($a1)
-	jal	check.row
-	
-	# Verificamos se pecas atingiram limite superior
-	beq	$v0, $zero, update.p3.not.lost
-	la	$t0, PLAYER3.LOST.FLAG 			#caso tenham perdido entao player perdeu
-	addi	$t1, $zero, 1
-	sw	$t1, 0($t0)
-	update.p3.not.lost:
-	
-	#permitimos criacao de nova peca
-	la	$t0, PLAYER3.NEWPIECE.FLAG
-	addi	$t1, $zero , 1
-	sw	$t1, 0($t0)
-	
-	#e permitimos que peca seja desenhada novamente
-	la	$t0, PLAYER3.DRAW.FLAG		
-	addi	$t1, $zero, 1			 
-	sw	$t1, 0($t0)	
-	
-	update.p3.end:
-	lw	$ra, 4($sp)
-	addi 	$sp, $sp, 4
+	sw	$t1, 0($t0)			# PLAYER1.DRAW.FLAG		
+	
+	update.p.end:
+	lw	$ra, 0($sp)
+	lw	$s4, 4($sp)
+	addi 	$sp, $sp, 8
 	
 	jr	$ra
 	
-	
-update.p4:
-	addi 	$sp, $sp, -4
-	sw	$ra, 4($sp)
-
-	#checamos se player ja perdeu 
-	la	$t0, PLAYER4.LOST.FLAG
-	lw	$t0, 0($t0)
-	bne	$t0, $zero, update.p4.end	# caso tenha perdido pulamos para end
-
-	#checamos se flag de nova peca esta ativa
-	la	$t0, PLAYER4.NEWPIECE.FLAG
-	lw	$t0, 0($t0)
-	beq	$t0, $zero, update.p4.draw
-	
-	######
-	# INICIALIZACAO DA PECA
-	######
-	######################################################################################
-	# Caso a flag sinalize vamos sortear nova peca e reiniciar pivo
-	# randomizar uma peca 0 a 6
-	update.p4.rand:
-	li 	$v0, 42  
-	li 	$a1, 6 
-	syscall     
-	add	$a0, $a0, 1
-	
-	la	$t0, PLAYER4.CURRENT.TYPE
-	la	$t1, PLAYER4.CURRENT.STATE
-	
-	sw	$a0, 0($t0)		# current piece 
-	addi	$a0, $zero, 1
-	sw	$a0, 0($t1)		# current sate  
-	
-	# Reiniciar pivo da peca
-	update.p4.pivo:
-	la	$t1, PLAYER4.CURRENT.PIVO
-	la	$t0, PLAYER4.INITIAL.PIVO
-	lw	$t0, 0($t0) 		# Pivo do player 1
-	sw	$t0, 0($t1)			# Armazenamos novo pivo
-	
-	la	$a0, PLAYER4.PIECE.FORM		# rotaciona apenas para popular array form 
-	la      $a1, PLAYER4.CURRENT.TYPE
-	la	$a2, PLAYER4.CURRENT.STATE
-	addi	$t1, $zero, PIECE.STATE4
-	sw	$t1, 0($a2)			# Jogamos valor da peca para estado 4, para ao rotacionar ir sempre para estado 1
-	jal	rotate.piece			# peca inicial esta sendo setada diretamente na memoria
-	
-	la	$t1, PLAYER4.NEWPIECE.FLAG
-	sw	$zero, 0($t1)			#abaixamos a flag
-	##########################################################################################
-	
-	update.p4.draw:
-	la	$t1, PLAYER4.DRAW.FLAG		
-	lw	$t1, 0($t1)
-	beq	$t1, $zero, update.p4.check.count 	# caso nao possa atualizar pulamos para contagem	
-	
-	#####
-	# DESENHAR PECA E PEGAR INPUTS
-	#####
-	##########################################################################################
-	# Jogamos pivo para t0
-	la	$t0, PLAYER4.CURRENT.PIVO
-	lw	$t0, 0($t0)			# Endereco do pivo 
-	
-	#desenhamos peca
-	add	$a0, $zero, $t0			# Endereco do pivo 
-	add	$a1, $zero, COLOR.BLACK		# Cor para desenhar
-	la	$a2, PLAYER4.PIECE.FORM		# Qual forma sera desenhada
-	jal 	draw.piece
-	
-	#salvamos posicao passada para apagar peca ou desenha fixa			 
-	la	$t1, PLAYER4.PAST.PIVO
-	sw	$t0, 0($t1)			# Armazenamos pivo atual para pivo passado
-	
-	#Acrscenta movimento para baixo em $t0
-	add 	$t1, $zero, SQUARE.UNIT.SIZE
-	mul	$t1, $t1, SCREEN.X
-	add	$t0, $t0, $t1			# t0 = proxima posicao
-	
-	#salvamos possicao passada e array passado
-	la	$a0, PLAYER4.PAST.FORM		# array past = array form
-	la	$a1, PLAYER4.PIECE.FORM	
-	jal	copy.array
-	
-	#Pegar input e acrescentamos em $t0
-	jal 	get.input
-	add	$s1, $zero, $t0			# $s1 = posicao anteior ao input mas acrescido de movimento para baixo
-	add 	$t0 , $t0, $v0			#acrescenta input
-	
-	#v1 recebe rotacao
-	beq	$v1, $zero, update.p4.no.use.rotation
-	############################################################################################
-	
-	####
-	# VALIDACAO DE ROTACAO
-	####
-	############################################################################################
-	#Caso ocorra requerimento de rotacao copiamos estado atual para temporario e validamos
-	#Se for valido entao copiamos array temporario para atual
-	la	$a0, PIECE.ARRAY.TEMP.FORM
-	la	$a1, PLAYER4.PIECE.FORM
-	jal	copy.array
-	
-	#rotacionamos array
-	la	$a0, PIECE.ARRAY.TEMP.FORM
-	la      $a1, PLAYER4.CURRENT.TYPE
-	la	$a2, PLAYER4.CURRENT.STATE
-	jal	rotate.piece
-	
-	#Checamos se ocorre colisao 
-	la	$a1, PIECE.ARRAY.TEMP.FORM
-	add	$a0, $zero, $t0 
-	jal	check.collision.piece
-	bne	$v0, $zero, update.p4.no.use.rotation
-	
-	#Se passou no teste de colisoes atualizamos array form
-	la	$a0, PLAYER4.PIECE.FORM
-	la	$a1, PIECE.ARRAY.TEMP.FORM
-	jal	copy.array
-	j	update.p4.save.pivo		#esta ok pulamos direto para contagem	
-	#######################################################################################
-	
-	######################################################################################
-	update.p4.no.use.rotation:
-	#checamos se apos acrscentar movimento para baixo + input ocorre colisao por lateral
-	la	$a1, PLAYER4.PIECE.FORM
-	add	$a0, $zero, $t0 
-	jal	check.collision.piece
-	beq	$v0, $zero, update.p4.use.input
-	update.p4.dont.use.input:			#caso ocorra colisao lateral em qualquer quadrado unitario
-	add	$t0, $zero, $s1				#e conferir se ocorre colisao por baixo 
-	update.p4.use.input:#input ja foi acrescido em t0
-	
-	#checamos se apos acrscentar movimento para baixo com ou sem input se ocorre colisao por baixo 
-	la	$a1, PLAYER4.PIECE.FORM
-	add	$a0, $zero, $t0 
-	jal	check.collision.piece
-	bne	$v0, $zero, update.p4.draw.static		# pulamos imediatamente para peca estatica
-	##########################################################################################
-	
-	update.p4.save.pivo:
-	la	$t1, PLAYER4.CURRENT.PIVO		#gurdamos novo pivo com inputs e acrescimos
-	sw	$t0, 0($t1)			
-	
-	#setamos uma flag para nao fazer update na peca apenas apos a contagem
-	la	$t0, PLAYER4.DRAW.FLAG		
-	sw	$zero, 0($t0)	
-	
-	######
-	# CONTAGEM EM STANDBY
-	######
-	###########################################################################################
-	# Contagem para atualizar peca
-	update.p4.check.count:
-	la	$t0, PLAYER4.TIMER.COUNT
-	la	$t1, PLAYER4.TIMER.END
-	lw	$t2, 0($t0)			# t2 = contador
-	lw	$t3, 0($t1)			# t3 = final da contagem
-	update.p4.lp1:
-		beq 	$t2, $t3, update.p4.lp1.end
-		addi	$t2, $t2, 1
-		sw	$t2, 0($t0)		#armazena contagem
-		j	update.p4.end		#terminamos update
-	update.p4.lp1.end:
-	sw	$zero, 0($t0)		#reiniciamos contador
-	###########################################################################################
-	
-	###########
-	# APAGAR PECA
-	###########
-	#apagar quadrado passado
-	update.p4.piece.erase:
-	la	$t0, PLAYER4.PAST.PIVO		#possui pivo passado anterior a input e rotacao
-	lw	$a0, 0($t0)	
-	addi 	$a1, $zero, COLOR.WHITE
-	la	$a2, PLAYER4.PAST.FORM
-	jal 	draw.piece
-	
-	#permitimos que peca seja desenhada novamente
-	la	$t0, PLAYER4.DRAW.FLAG		
-	addi	$t1, $zero, 1			 
-	sw	$t1, 0($t0)	
-	
-	j	update.p4.end				# retornamos para main para proximo update
-	#############################################################################################
-	
-	###########
-	# ATUALIZAR COLISAO
-	###########
-	#############################################################################################
-	#Atualizamos matriz de colisao caso peca nao possa mais mover
-	update.p4.draw.static:
-	la	$t0, PLAYER4.PAST.PIVO		#possui pivo passado anterior a input e rotacao
-	lw	$a0, 0($t0)	
-	la	$a1, PLAYER4.PIECE.FORM	
-	addi	$a2, $zero, 1	
-	jal	update.piece.collision.matrix
-	
-	#Checamos se alguma linha foi preenchida
-	la	$a0, PLAYER4.PAST.PIVO		#possui pivo passado anterior a input e rotacao
-	la	$a1, PLAYER4.INIT.FIELD.PIVO
-	lw	$a0, 0($a0)
-	lw	$a1, 0($a1)
-	jal	check.row
-	
-	# Verificamos se pecas atingiram limite superior
-	beq	$v0, $zero, update.p4.not.lost
-	la	$t0, PLAYER4.LOST.FLAG 			#caso tenham perdido entao player perdeu
-	addi	$t1, $zero, 1
-	sw	$t1, 0($t0)
-	update.p4.not.lost:
-	
-	#permitimos criacao de nova peca
-	la	$t0, PLAYER4.NEWPIECE.FLAG
-	addi	$t1, $zero , 1
-	sw	$t1, 0($t0)
-	
-	#e permitimos que peca seja desenhada novamente
-	la	$t0, PLAYER4.DRAW.FLAG		
-	addi	$t1, $zero, 1			 
-	sw	$t1, 0($t0)	
-	
-	update.p4.end:
-	lw	$ra, 4($sp)
-	addi 	$sp, $sp, 4
-	
-	jr	$ra
-
-
 
 draw.piece:#(a0 = pivo, a1 = color, $a2 = endereco inicial do array)
 	addi 	$sp, $sp, -28
