@@ -3,15 +3,24 @@
 #Variaveis
 ###############
 TECLADO:		.word 	0xFF000004 
+#TECLADO:		.word 	0xFFFF0500 
+PLAYER.COUNT:		.word	1
+
+STRING.PLAYER1:		.asciiz	 "PLAYER 1"
+STRING.PLAYER2:		.asciiz	 "PLAYER 2"
+STRING.PLAYER3:		.asciiz	 "PLAYER 3"
+STRING.PLAYER4:		.asciiz	 "PLAYER 4"
+STRING.POINTS:		.asciiz	 "POINTS"
+STRING.SELECT:		.asciiz	 "->"
 
 ####
 #PLAYER 1
 ####
 ####################################################################################################
 PLAYER1.TIMER.COUNT:	.word 	0 #0
-#PLAYER1.TIMER.END:	.word 	1000 #4			# Tempo de espera varia com clock
-#PLAYER1.TIMER.END:	.word 	1 #4			# Tempo de espera varia com clock
-PLAYER1.TIMER.END:	.word 	2000 #4			# Tempo de espera varia com clock
+#PLAYER1.TIMER.END:	.word 	1000 # 4			# Tempo de espera varia com clock
+PLAYER1.TIMER.END:	.word 	1 # 4			# Tempo de espera varia com clock
+#PLAYER1.TIMER.END:	.word 	2000 #4			# Tempo de espera varia com clock
 
 
 PLAYER1.NEWPIECE.FLAG:	.word   1 #8
@@ -28,13 +37,21 @@ PLAYER1.CURRENT.STATE:	.word 	0x00000001 # 40
 
 PLAYER1.PIECE.FORM:	.word	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 # 44 
 PLAYER1.PAST.FORM:	.word	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0	# 108
+
+PLAYER1.SCORE:		.word	0 #172
 	
+PLAYER1.KEY.ROTATE:	.word	0x77	#0xAAFFFFFF # 176
+PLAYER1.KEY.DOWN:	.word	0x73	#0xAAFFFFFF
+PLAYER1.KEY.RIGHT:	.word	0x64	#0xAAFFFFFF
+PLAYER1.KEY.LEFT:	.word	0x61	#0xAAFFFFFF
+
 ####
 #PLAYER 2
 ####
 ################################################################################################
 PLAYER2.TIMER.COUNT:	.word 	0 
-PLAYER2.TIMER.END:	.word 	1000			# Tempo de espera varia com clock
+#PLAYER2.TIMER.END:	.word 	1000			# Tempo de espera varia com clock
+PLAYER2.TIMER.END:	.word 	1 
 
 PLAYER2.NEWPIECE.FLAG:	.word   1
 PLAYER2.DRAW.FLAG:	.word   1
@@ -51,12 +68,20 @@ PLAYER2.CURRENT.STATE:	.word 	0x00000001
 PLAYER2.PIECE.FORM:	.word	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 
 PLAYER2.PAST.FORM:	.word	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0	
 
+PLAYER2.SCORE:		.word	0 # 172
+
+PLAYER2.KEY.ROTATE:	.word	0x79	#0xAAFFFFFF # 176
+PLAYER2.KEY.DOWN:	.word	0x79	#0xAAFFFFFF
+PLAYER2.KEY.RIGHT:	.word	0x69	#0xAAFFFFFF
+PLAYER2.KEY.LEFT:	.word	0x69	#0xAAFFFFFF
+
 ####
 #PLAYER 3
 ####
 ##############################################################################################
 PLAYER3.TIMER.COUNT:	.word 	0 
-PLAYER3.TIMER.END:	.word 	1000			# Tempo de espera varia com clock
+#PLAYER3.TIMER.END:	.word 	1000			# Tempo de espera varia com clock
+PLAYER3.TIMER.END:	.word 	1 
 
 PLAYER3.NEWPIECE.FLAG:	.word   1
 PLAYER3.DRAW.FLAG:	.word   1
@@ -73,12 +98,20 @@ PLAYER3.CURRENT.STATE:	.word 	0x00000001
 PLAYER3.PIECE.FORM:	.word	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 
 PLAYER3.PAST.FORM:	.word	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0	
 
+PLAYER3.SCORE:		.word	0 #172
+
+PLAYER3.KEY.ROTATE:	.word	0x79	#0xAAFFFFFF # 176
+PLAYER3.KEY.DOWN:	.word	0x79	#0xAAFFFFFF
+PLAYER3.KEY.RIGHT:	.word	0x69	#0xAAFFFFFF
+PLAYER3.KEY.LEFT:	.word	0x69	#0xAAFFFFFF
+
 ####
 #PLAYER 4
 ####
 ############################################################################################
 PLAYER4.TIMER.COUNT:	.word 	0 
-PLAYER4.TIMER.END:	.word 	1000			# Tempo de espera varia com clock
+#PLAYER4.TIMER.END:	.word 	1000			# Tempo de espera varia com clock
+PLAYER4.TIMER.END:	.word 	1 
 
 PLAYER4.NEWPIECE.FLAG:	.word   1
 PLAYER4.DRAW.FLAG:	.word   1
@@ -94,7 +127,14 @@ PLAYER4.CURRENT.STATE:	.word 	0x00000001
 
 PLAYER4.PIECE.FORM:	.word	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 
 PLAYER4.PAST.FORM:	.word	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0	
-				
+
+PLAYER4.SCORE:		.word	0 #112
+
+PLAYER4.KEY.ROTATE:	.word	0x79	#0xAAFFFFFF # 176
+PLAYER4.KEY.DOWN:	.word	0x79	#0xAAFFFFFF
+PLAYER4.KEY.RIGHT:	.word	0x69	#0xAAFFFFFF
+PLAYER4.KEY.LEFT:	.word	0x69	#0xAAFFFFFF
+									
 ########################################################################
 
 #Contem endereços relativos ao quadrado pivo = (2,3) modificar caso mude tamanho das pecas
@@ -218,6 +258,8 @@ PIECE.ARRAY.T.STATE4:	.word	0,0,1,0,
 				0,0,1,0,
 				0,0,0,0
 
+
+
 ################
 # Definiçoes
 ################
@@ -260,12 +302,13 @@ PIECE.ARRAY.T.STATE4:	.word	0,0,1,0,
 .eqv	COL.FIELD.SUP.LIM	0xFF014000	# FF012C00 + 320 * 16
 .eqv	COL.FIELD.INF.LIM	0xFF025800	# FF012C00 + 320 * 240
 
-.eqv	PIECES.SUP.LIM		0xFF004100	# Limite indica a partir de qual linha player ira perder
+.eqv	PIECES.SUP.LIM		0xFF004100	# Limite indica a partir de qual linha player ira perder	
 
-.eqv	KEY.RIGHT		0x64
-.eqv	KEY.LEFT		0x61 
-.eqv	KEY.DOWN		0x73
-.eqv	KEY.ROTATE		0x77 #77	
+.eqv	KEY.NOKEY		0
+.eqv	KEY.ROTATE		1
+.eqv	KEY.DOWN		2
+.eqv	KEY.RIGHT		3
+.eqv	KEY.LEFT		4
 
 .eqv	COLOR.BLUE		0x000000F0
 .eqv	COLOR.GREEN		0x00000038
@@ -274,16 +317,42 @@ PIECE.ARRAY.T.STATE4:	.word	0,0,1,0,
 .eqv	COLOR.BLACK		0x00000000 	# necessario manter bits a mais ao inves de 0x00
 
 .text
+	jal	draw.initial.screen
+	jal	choose.player.count
 	jal	initiate.game
 main:
 	la	$a0, PLAYER1.TIMER.COUNT
 	jal	update.p
+	jal	update.p.points
+	
+	#Checar se temos apenas 1 player
+	la	$t0, PLAYER.COUNT	
+	lw	$t0, 0($t0)
+	addi	$t1, $zero, 1
+	beq	$t0, $t1, main.end
+	
 	la	$a0, PLAYER2.TIMER.COUNT
 	jal	update.p
+	
+	#Checar se temos apenas 2 player
+	la	$t0, PLAYER.COUNT	
+	lw	$t0, 0($t0)
+	addi	$t1, $zero, 2
+	beq	$t0, $t1, main.end
+	
 	la	$a0, PLAYER3.TIMER.COUNT
 	jal	update.p
+	
+	#Checar se temos apenas 3 player
+	la	$t0, PLAYER.COUNT	
+	lw	$t0, 0($t0)
+	addi	$t1, $zero, 3
+	beq	$t0, $t1, main.end
+	
 	la	$a0, PLAYER4.TIMER.COUNT
 	jal	update.p
+	
+	main.end:
 	
 	j	main
 	
@@ -306,6 +375,11 @@ initiate.game:
 	la	$a0, PLAYER4.INIT.FIELD.PIVO
 	lw	$a0, 0($a0)
 	jal	draw.lat.col
+	
+	#Clean screen
+	li $v0,48
+	li $a0,0xFF
+	syscall
 	
 	jal 	draw.background
 	
@@ -331,6 +405,7 @@ update.p:# (a0 = PLAYERX.TIMER.COUNT) Mapeamento em relacao
 	lw	$t0, 0($t0)	
 	beq	$t0, $zero, update.p.draw
 	
+	
 	######
 	# INICIALIZACAO DA PECA
 	######
@@ -342,6 +417,8 @@ update.p:# (a0 = PLAYERX.TIMER.COUNT) Mapeamento em relacao
 	li 	$a1, 6 
 	syscall     
 	add	$a0, $a0, 1
+	#Debug
+	add	$a0, $zero ,2
 	
 	addi	$t0, $s4, 36		# PLAYER1.CURRENT.TYPE
 	addi	$t1, $s4, 40		# PLAYER1.CURRENT.STATE
@@ -403,6 +480,7 @@ update.p:# (a0 = PLAYERX.TIMER.COUNT) Mapeamento em relacao
 	jal	copy.array
 	
 	#Pegar input e acrescentamos em $t0
+	add	$a0, $s4, 176			#PLAYER.KEY.ROTATE
 	jal 	get.input
 	add	$s1, $zero, $t0			# $s1 = posicao anteior ao input mas acrescido de movimento para baixo
 	add 	$t0 , $t0, $v0			#acrescenta input
@@ -521,10 +599,17 @@ update.p:# (a0 = PLAYERX.TIMER.COUNT) Mapeamento em relacao
 	#la	$a1, PLAYER1.INIT.FIELD.PIVO
 	lw	$a0, 32($s4)			# PLAYER1.PAST.PIVO	
 	lw	$a1, 24($s4)			# PLAYER1.INIT.FIELD.PIVO
-	jal	check.row
+	
+	jal	check.row	#precisa usar retorno em v1 pois update piece collision retorna em v0 valor avaliado posteriormente
+	
+	#atualizar pontuacao do player
+	add	$t0, $s4, 172
+	lw	$t1, 0($t0)
+	add	$t1, $t1, $v1
+	sw	$t1, 0($t0) 
 	
 	# Verificamos se pecas atingiram limite superior
-	beq	$v0, $zero, update.p.not.lost
+	beq	$v0, $zero, update.p.not.lost			# <---------------------- v0 utilizado aqui
 	addi	$t0, $s4, 16 			# PLAYER1.LOST.FLAG #caso tenham perdido entao player perdeu
 	addi	$t1, $zero, 1
 	sw	$t1, 0($t0)			# PLAYER1.LOST.FLAG
@@ -923,7 +1008,7 @@ draw.lat.col:#(a0 = PLAYER.INIT.FIELD.PIVO)
 
 
 
-check.row:#(a0 = pivo da peca, a1 = pivo do inicio do campo)
+check.row:#(a0 = pivo da peca, a1 = pivo do inicio do campo) $v1 = pontuacao
 	addi 	$sp, $sp, -40
 	sw	$t0, 0($sp)
 	sw	$t1, 4($sp)
@@ -935,6 +1020,9 @@ check.row:#(a0 = pivo da peca, a1 = pivo do inicio do campo)
 	sw	$s0, 28($sp)
 	sw	$s1, 32($sp)
 	sw	$ra, 36($sp)
+	
+	#pontuacao para zero
+	add	$v1, $zero, $zero
 	
 	# Calcular ponto inicial da verificacao
 	sub	$t0, $a0, $a1			# Subtraimos pivo da peca do pivo inicial
@@ -1005,6 +1093,8 @@ check.row:#(a0 = pivo da peca, a1 = pivo do inicio do campo)
 		addi	$a3, $zero, 1			# Dropar como matriz de colisao
 		jal	drop.row
 		
+		addi	$v1, $v1, 1
+		
 		addi	$t0, $t0, 1
 		j	check.row.lp1
 		
@@ -1042,6 +1132,11 @@ drop.row:#(a0 = pivo da primeira peca da linha a ser removida, a1 = FIELD.INF.LI
 	sw	$t5, 20($sp)
 	sw	$t6, 24($sp)
 	sw	$t7, 28($sp)
+	
+	addi	$t0 , $zero, SQUARE.UNIT.SIZE	
+	addi	$t1, $zero, SCREEN.X
+	mul	$t0, $t0, $t1
+	add	$a2, $a2, $t0
 	
 	# Queremos subir para a unidade acima
 	# Dividimos a unidade por dois acrescentamos 1 
@@ -1127,49 +1222,402 @@ drop.row:#(a0 = pivo da primeira peca da linha a ser removida, a1 = FIELD.INF.LI
 
 
 #($v0 = valor para adicionar a pivo, v1 = requerimento de rotacao)
-get.input:
+get.input:#(a0 = PLAYER.KEY.ROTATE)
 	#salvar registradores usados
-	addi 	$sp, $sp, -4
+	addi 	$sp, $sp, -12
 	sw	$t0, 0($sp)
+	sw	$t1, 4($sp)
+	sw	$ra, 8($sp)
 
-	lw $t0, TECLADO
-	lw $t0 ,0($t0)
+	#Retorna em v0 key pressionada
+	#a0 ja contem PLAYER.KEY.ROTATE
+	jal	get.key
+	add	$t0, $zero, $v0
 	
-	movement.witch.key:
-		key.rotate:
-			bne $t0, KEY.ROTATE, key.down
-			add $v0, $zero, $zero
-			addi $v1, $zero, 1
-			j end.get.input
-		key.down:
-			bne $t0, KEY.DOWN, key.right
-			addi $v0, $zero, 3840		# nada por enquanto
-			add $v1, $zero, $zero
-			j end.get.input
-		key.right:
-			bne $t0, KEY.RIGHT, key.left
-			addi $v0, $zero, SQUARE.UNIT.SIZE
-			add $v1, $zero, $zero
-			j end.get.input
-		key.left:
-			bne $t0, KEY.LEFT, key.nokey
-			addi $v0, $zero, -SQUARE.UNIT.SIZE
-			add $v1, $zero, $zero
-			j end.get.input
-		key.nokey:
-			add $v1, $zero, $zero
-			add $v0, $zero, $zero
+	get.input.witch:
+		get.input.rotate:
+			addi 	$t1, $zero, KEY.ROTATE			
+			bne 	$t0, $t1, get.input.down
+			add 	$v0, $zero, $zero
+			addi 	$v1, $zero, 1
+			j 	get.input.end
+		get.input.down:
+			addi 	$t1, $zero, KEY.DOWN
+			bne 	$t0, $t1, get.input.right
+			addi 	$v0, $zero, 3840		
+			add 	$v1, $zero, $zero
+			j 	get.input.end
+		get.input.right:
+			addi 	$t1, $zero, KEY.RIGHT
+			bne 	$t0, $t1, get.input.left
+			addi 	$v0, $zero, SQUARE.UNIT.SIZE
+			add 	$v1, $zero, $zero
+			j 	get.input.end
+		get.input.left:
+			addi 	$t1, $zero, KEY.LEFT
+			bne 	$t0, $t1, get.input.nokey
+			addi 	$v0, $zero, -SQUARE.UNIT.SIZE
+			add 	$v1, $zero, $zero
+			j 	get.input.end
+		get.input.nokey:
+			add 	$v1, $zero, $zero
+			add	$v0, $zero, $zero
 	
-	end.get.input:
-	#limpamos endereço do teclado
-	lw $t0, TECLADO
-	sw $zero , 0($t0)
-	
+	get.input.end:
 	lw	$t0, 0($sp)
-	addi 	$sp, $sp, 4
+	lw	$t1, 4($sp)
+	lw	$ra, 8($sp)
+	addi 	$sp, $sp, 12
 	
 	jr $ra
+
+#v0 = key pressionada KEY.TYPE
+get.key:#(a0 = PLAYER.KEY.ROTATE)
+	addi 	$sp, $sp, -8
+	sw	$t0, 0($sp)
+	sw	$t1, 4($sp)
+	
+	la 	$t0, TECLADO
+	lw 	$t0 ,0($t0)
+	lw	$t0, 0($t0)
+	
+	get.key.witch:
+		get.key.rotate:
+			add 	$t1, $a0, 0			# PLAYER.KEY.ROTATE
+			lw 	$t1, 0($t1)	
+			bne 	$t0, $t1, get.key.down
+			addi 	$v0, $zero, KEY.ROTATE
+			j 	get.key.clean
+		get.key.down:
+			add 	$t1, $a0, 4			# PLAYER.KEY.DOWN
+			lw 	$t1, 0($t1)
+			bne 	$t0, $t1, get.key.right
+			addi 	$v0, $zero, KEY.DOWN
+			j 	get.key.clean
+		get.key.right:
+			add 	$t1, $a0, 8			# PLAYER.KEY.RIGHT
+			lw 	$t1, 0($t1)
+			bne 	$t0, $t1, get.key.left
+			addi 	$v0, $zero, KEY.RIGHT
+			j 	get.key.clean
+		get.key.left:
+			add 	$t1, $a0, 12			# PLAYER.KEY.LEFT
+			lw 	$t1, 0($t1)
+			bne 	$t0, $t1, get.key.nokey
+			addi 	$v0, $zero, KEY.LEFT
+			j 	get.key.clean
+		get.key.nokey:
+			addi	$v0, $zero, KEY.NOKEY
+			j	get.key.no.clean
+	
+	get.key.clean:
+	#limpamos endereço do teclado
+	lw 	$t0, TECLADO
+	sw 	$zero , 0($t0)
+	
+	get.key.no.clean:
+	
+	lw	$t0, 0($sp)
+	lw	$t1, 4($sp)
+	addi 	$sp, $sp, 8
+	
+	jr $ra
+
+
+update.p.points:
+	addi 	$sp, $sp, -4
+	sw	$ra, 0($sp)
+	
+	######
+	#PLAYER 1
+	######
+	###############################################################
+	
+	la	$a0, STRING.PLAYER1 
+	la	$a1, PLAYER1.SCORE
+	addi	$a2, $zero, 12
+	jal	print.status
+	
+	#Checar se temos apenas 1 player
+	la	$t0, PLAYER.COUNT	
+	lw	$t0, 0($t0)
+	addi	$t1, $zero, 1
+	beq	$t0, $t1, update.p.points.end
+	
+	######
+	#PLAYER 2
+	######
+	###############################################################
+	
+	la	$a0, STRING.PLAYER2 
+	la	$a1, PLAYER2.SCORE
+	addi	$a2, $zero, 92
+	jal	print.status
+	
+	#Checar se temos apenas 1 player
+	la	$t0, PLAYER.COUNT	
+	lw	$t0, 0($t0)
+	addi	$t1, $zero, 2
+	beq	$t0, $t1, update.p.points.end
+	
+	######
+	#PLAYER 3
+	######
+	###############################################################
+	
+	la	$a0, STRING.PLAYER3 
+	la	$a1, PLAYER3.SCORE
+	addi	$a2, $zero, 172
+	jal	print.status
+	
+	#Checar se temos apenas 1 player
+	la	$t0, PLAYER.COUNT	
+	lw	$t0, 0($t0)
+	addi	$t1, $zero, 3
+	beq	$t0, $t1, update.p.points.end
+	
+	######
+	#PLAYER 4
+	######
+	###############################################################
+	la	$a0, STRING.PLAYER4 
+	la	$a1, PLAYER4.SCORE
+	addi	$a2, $zero, 252
+	jal	print.status
+	
+	update.p.points.end:
+	lw	$ra, 0($sp)
+	addi 	$sp, $sp, 4
+	
+	jr 	$ra
+
+print.status:#(a0 = endereco string STRING.PLAYER , a1 = endereco pontuacao PLAYER.SCORE, a2 = coluna para plotar)
+	addi	$sp, $sp, -12
+	sw	$s0, 0($sp)
+	sw	$s1, 4($sp)
+	sw	$s2, 8($sp)
+	
+	add	$s0, $zero, $a0
+	add	$s1, $zero, $a1
+	add	$s2, $zero, $a2
+	
+	addi 	$v0,$zero, 104 	#4
+	add 	$a0, $zero, $s0
+	add 	$a1, $zero, $s2
+	li 	$a2,16
+	li 	$a3,0x00FF
+	syscall
+	
+	addi 	$v0,$zero, 104 #4
+	la 	$a0, STRING.POINTS
+	add 	$a1, $zero, $s2
+	li 	$a2,24
+	li 	$a3,0x00FF
+	syscall
+	
+	addi 	$v0,$zero, 101	#1
+	add	$a0, $zero, $s1
+	lw	$a0, 0($a0)
+	add 	$a1, $zero, $s2
+	addi	$a1, $a1, 48
+	li 	$a2,24
+	li 	$a3,0x00FF
+	syscall
+	
+	lw	$s0, 0($sp)
+	lw	$s1, 4($sp)
+	lw	$s2, 8($sp)
+	addi	$sp, $sp, 12
+	
+	jr	$ra
+
+#Informa em PLAYER.COUNT numero de players, o controle utilizado e do player 1
+choose.player.count:		
+	addi	$sp, $sp, -12
+	sw	$t0, 0($sp)
+	sw	$t1, 4($sp)
+	sw	$ra, 8($sp)
+	
+	# selecao inicial do player
+	add	$t0, $zero, 1
+	
+	choose.player.get.key:
+	add	$a0, $zero, $t0
+	jal	draw.marker
+	la	$a0, PLAYER1.KEY.ROTATE
+	jal	get.key
+	
+	choose.player.witch.key:
+		choose.player.right:
+			addi 	$t1, $zero, KEY.RIGHT			
+			bne 	$v0, $t1, choose.player.left
+			
+			#adicionamos para proximo player
+			addi	$t0, $t0, 1
+			addi	$t1, $zero, 5
+			beq	$t0, $t1, choose.player.right.sub
+			j choose.player.get.key
+			
+			# Caso estejamos em zero voltamos para 4
+			choose.player.right.sub:
+			add	$t0, $zero, 1
+			j choose.player.get.key
+			
+		choose.player.left:
+			addi 	$t1, $zero, KEY.LEFT			
+			bne 	$v0, $t1, choose.player.select
+			
+			#adicionamos para proximo player
+			addi	$t0, $t0, -1
+			beq	$t0, $zero, choose.player.left.add
+			j choose.player.get.key
+			
+			# Caso estejamos em zero voltamos para 4
+			choose.player.left.add:
+			add	$t0, $zero, 4
+			j choose.player.get.key
 		
+		choose.player.select:
+			addi 	$t1, $zero, KEY.ROTATE			
+			bne 	$v0, $t1, choose.player.none
+			j	choose.player.end
+		
+		choose.player.none:
+			j	choose.player.get.key
+	
+	choose.player.end:
+	# Armazenamos contagem de players
+	la	$t1, PLAYER.COUNT
+	sw	$t0, 0($t1)
+	
+	lw	$t0, 0($sp)
+	lw	$t1, 4($sp)
+	lw	$ra, 8($sp)
+	addi	$sp, $sp, 12
+	
+	jr	$ra
+	
+# Desenha marcador na posicao selecionada
+draw.marker:#(a0 = PLAYER selecionado 1..4)
+	addi	$sp, $sp, -32
+	sw	$ra, 0($sp)
+	sw	$t0, 4($sp)
+	sw	$t1, 8($sp)
+	sw	$t2, 12($sp)
+	sw	$t3, 16($sp)
+	lw	$t4, 20($sp)
+	sw	$t5, 24($sp)
+	sw	$t6, 28($sp)
+	
+	addi	$t5, $zero, 0x00FF	# Desenhar marcador com cor
+	addi	$t6, $zero, 0x0000	# Nao desenhar marcador
+	
+	add	$t0, $zero, $t6
+	add	$t1, $zero, $t6
+	add	$t2, $zero, $t6
+	add	$t3, $zero, $t6
+	
+	draw.marker.p1:
+		addi	$t4, $zero, 1
+		bne	$a0, $t4, draw.marker.p2
+		add	$t0, $zero, $t5
+		j	draw.marker.at
+	draw.marker.p2:
+		addi	$t4, $zero, 2
+		bne	$a0, $t4, draw.marker.p3
+		add	$t1, $zero, $t5
+		j	draw.marker.at
+	draw.marker.p3:
+		addi	$t4, $zero, 3
+		bne	$a0, $t4, draw.marker.p4
+		add	$t2, $zero, $t5
+		j	draw.marker.at
+	draw.marker.p4:
+		addi	$t4, $zero, 4
+		bne	$a0, $t4, draw.marker.at
+		add	$t3, $zero, $t5
+	
+	draw.marker.at:
+	# Strings com marcadores de players
+	la 	$a0, STRING.SELECT 
+	li 	$a1, 117 
+	li 	$a2, 135
+	add 	$a3, $zero, $t0
+	jal 	print.string
+	
+	la 	$a0, STRING.SELECT 
+	li 	$a1, 117 
+	li 	$a2, 145
+	add 	$a3, $zero, $t1
+	jal 	print.string
+	
+	la 	$a0, STRING.SELECT 
+	li 	$a1, 117 
+	li 	$a2, 155
+	add 	$a3, $zero, $t2
+	jal 	print.string
+	
+	la 	$a0, STRING.SELECT 
+	li 	$a1, 117 
+	li 	$a2, 165
+	add 	$a3, $zero, $t3
+	jal 	print.string
+	
+	lw	$ra, 0($sp)
+	lw	$t0, 4($sp)
+	lw	$t1, 8($sp)
+	lw	$t2, 12($sp)
+	lw	$t3, 16($sp)
+	lw	$t4, 20($sp)
+	lw	$t5, 24($sp)
+	lw	$t6, 28($sp)
+	addi	$sp, $sp, 32
+	
+	jr $ra 
+	
+#Screen com opcoes e background
+draw.initial.screen:
+	addi	$sp, $sp, -4
+	sw	$ra, 0($sp)
+	
+	# Desenhar background
+	
+	# Strings com opcoes de players
+	la 	$a0, STRING.PLAYER1 
+	li 	$a1, 125 
+	li 	$a2, 135
+	li 	$a3,0x00FF
+	jal 	print.string
+	
+	la 	$a0, STRING.PLAYER2 
+	li 	$a1, 125 
+	li 	$a2, 145
+	li 	$a3,0x00FF
+	jal 	print.string
+	
+	la 	$a0, STRING.PLAYER3 
+	li 	$a1, 125 
+	li 	$a2, 155
+	li 	$a3,0x00FF
+	jal 	print.string
+	
+	la 	$a0, STRING.PLAYER4 
+	li 	$a1, 125 
+	li 	$a2, 165
+	li 	$a3,0x00FF
+	jal 	print.string
+	
+	lw	$ra, 0($sp)
+	addi	$sp, $sp, 4
+	
+	jr	$ra
+	
+print.string:#(a0 = STRING, a1 = COLUNA, a2 = LINHA, a3 = COLOR)
+	addi 	$v0,$zero, 104 	#4
+	syscall
+	
+	jr	$ra 
+
 draw.background:
 	#salvar registradores usados
 	addi 	$sp, $sp, -16
