@@ -68,10 +68,13 @@
     jal draw_rectangle
 .end_macro
 
-.macro drawFig %sizepos, %imagem
-    li   $a0,%sizepos
-    la   $a1,%imagem
+.macro drawFig %x,%y,%width,%height, %image
+    addi    $a0,$0,%x           # X left top corner
+    addi    $a1,$0,%y   # Y left top corner
+    addi    $v0,$0,%image       # Color
 
+    addi    $a2,$0,%width       # width
+    addi    $a3,$0,%height      # height
     jal  draw_figure
 .end_macro
 
@@ -115,9 +118,14 @@ main:
 	jal  draw_bgfigure
 
 	# Draw a file figure
-	li   $a0,0x30248080 # SIZEpos (YYXXxxyy)
-	la  $a1,my_img
+	addi    $a0,$0,0x80           # X left top corner
+	addi    $a1,$0,0x80   # Y left top corner
+	la  	$v0,my_img
+	addi    $a2,$0,0x30       # width
+	addi    $a3,$0,0x24      # height
 	jal  draw_figure
+	
+
 
 	#clear_screen
 	j main
@@ -238,21 +246,18 @@ draw_figure:
     sw $t5, 22($sp)
     sw $t6, 24($sp)
 
-    sll $t0, $a0, 24    # x inicial :calculo 1
-    srl $t0, $t0, 24    # x inicial :conclui
-    sll $t1, $a0, 16    # y inicial
-    srl $t1, $t1, 24    # y inicial :conclui
+    add $t0, $a0, $0    # x inicial
+    add $t1, $a1, $0    # y inicial
 
     addi $t2, $zero, SCREEN_DIM_X    # 320
     mul $t2, $t2, $t1   # Y*320
     li $t1, SCREEN_PIXEL0  # Posição inical memoria
     addu $t2, $t1, $t2  # Posição na memoria, para VGA, deslocamento apenas em Y
     addu $t2, $t2, $t0  # Posição na memoria, para VGA, deslocamento Y e X
-    addu $t5, $a1, $zero# Posição memoria da figura
+    addu $t5, $v0, $zero# Posição memoria da figura
 
-    sll $t1, $a0, 8     # Largura
-    srl $t1, $t1, 24    # Largura :conclui
-    srl $t0, $a0, 24    # Altura
+    add $t0, $a2, $0    # Altura
+    add $t1, $a3, $0    # Largura
 
     add $t3, $zero, $zero   # Zera $t3
     add $t4, $zero, $zero   # Zera $t4
