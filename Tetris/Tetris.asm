@@ -2,14 +2,14 @@
 ###############
 #Variaveis
 ###############
-TECLADO:		.word 	0xFF000004 
-#TECLADO:		.word 	0xFFFF0500 
+IRDA.READ:		.word 	0xFF000004 	#teclado
+#IRDA.READ:		.word 	0xFFFF0504 
 PLAYER.COUNT:		.word	1
 
-STRING.PLAYER1:		.asciiz	 "PLAYER 1"
-STRING.PLAYER2:		.asciiz	 "PLAYER 2"
-STRING.PLAYER3:		.asciiz	 "PLAYER 3"
-STRING.PLAYER4:		.asciiz	 "PLAYER 4"
+STRING.PLAYER1:		.asciiz	 "PLAYER1"
+STRING.PLAYER2:		.asciiz	 "PLAYER2"
+STRING.PLAYER3:		.asciiz	 "PLAYER3"
+STRING.PLAYER4:		.asciiz	 "PLAYER4"
 STRING.POINTS:		.asciiz	 "POINTS"
 STRING.SELECT:		.asciiz	 "->"
 
@@ -18,8 +18,8 @@ STRING.SELECT:		.asciiz	 "->"
 ####
 ####################################################################################################
 PLAYER1.TIMER.COUNT:	.word 	0 #0
-#PLAYER1.TIMER.END:	.word 	1000 # 4			# Tempo de espera varia com clock
-PLAYER1.TIMER.END:	.word 	1 # 4			# Tempo de espera varia com clock
+PLAYER1.TIMER.END:	.word 	10 # 4			# Tempo de espera varia com clock
+#PLAYER1.TIMER.END:	.word 	1 # 4			# Tempo de espera varia com clock
 #PLAYER1.TIMER.END:	.word 	2000 #4			# Tempo de espera varia com clock
 
 
@@ -40,10 +40,15 @@ PLAYER1.PAST.FORM:	.word	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0	# 108
 
 PLAYER1.SCORE:		.word	0 #172
 	
-PLAYER1.KEY.ROTATE:	.word	0x77	#0xAAFFFFFF # 176
-PLAYER1.KEY.DOWN:	.word	0x73	#0xAAFFFFFF
-PLAYER1.KEY.RIGHT:	.word	0x64	#0xAAFFFFFF
-PLAYER1.KEY.LEFT:	.word	0x61	#0xAAFFFFFF
+#PLAYER1.KEY.ROTATE:	.word	0xEA155E87	 # 176
+#PLAYER1.KEY.DOWN:	.word	0xF30C5E87	
+#PLAYER1.KEY.RIGHT:	.word	0xE31C5E87	
+#PLAYER1.KEY.LEFT:	.word	0xE41B5e87	
+
+PLAYER1.KEY.ROTATE:	.word	0x77
+PLAYER1.KEY.DOWN:	.word	0x73
+PLAYER1.KEY.RIGHT:	.word	0x64
+PLAYER1.KEY.LEFT:	.word	0x61
 
 ####
 #PLAYER 2
@@ -51,7 +56,7 @@ PLAYER1.KEY.LEFT:	.word	0x61	#0xAAFFFFFF
 ################################################################################################
 PLAYER2.TIMER.COUNT:	.word 	0 
 #PLAYER2.TIMER.END:	.word 	1000			# Tempo de espera varia com clock
-PLAYER2.TIMER.END:	.word 	1 
+PLAYER2.TIMER.END:	.word 	10 
 
 PLAYER2.NEWPIECE.FLAG:	.word   1
 PLAYER2.DRAW.FLAG:	.word   1
@@ -81,7 +86,7 @@ PLAYER2.KEY.LEFT:	.word	0x69	#0xAAFFFFFF
 ##############################################################################################
 PLAYER3.TIMER.COUNT:	.word 	0 
 #PLAYER3.TIMER.END:	.word 	1000			# Tempo de espera varia com clock
-PLAYER3.TIMER.END:	.word 	1 
+PLAYER3.TIMER.END:	.word 	10 
 
 PLAYER3.NEWPIECE.FLAG:	.word   1
 PLAYER3.DRAW.FLAG:	.word   1
@@ -111,7 +116,7 @@ PLAYER3.KEY.LEFT:	.word	0x69	#0xAAFFFFFF
 ############################################################################################
 PLAYER4.TIMER.COUNT:	.word 	0 
 #PLAYER4.TIMER.END:	.word 	1000			# Tempo de espera varia com clock
-PLAYER4.TIMER.END:	.word 	1 
+PLAYER4.TIMER.END:	.word 	10 
 
 PLAYER4.NEWPIECE.FLAG:	.word   1
 PLAYER4.DRAW.FLAG:	.word   1
@@ -258,7 +263,8 @@ PIECE.ARRAY.T.STATE4:	.word	0,0,1,0,
 				0,0,1,0,
 				0,0,0,0
 
-
+MENU.BACKGROUND:	
+.include	"tetrisnes.asm"
 
 ################
 # Definiçoes
@@ -284,8 +290,8 @@ PIECE.ARRAY.T.STATE4:	.word	0,0,1,0,
 .eqv	SQUARE.UNIT.SIZE	4		# 4x4 pixels Ao modificar tamanho e necessario atualizar matriz de enrderecos relativos
 						# e tambem ponto do pivo inicial da peca ao ser criada
 
-.eqv	COLLISION.BASE		0xFF012C00	# Para uma screen de 320x240 = 12C00
-#.eqv	COLLISION.BASE		0xFF000000	# Para uma screen de 320x240 = 12C00
+#.eqv	COLLISION.BASE		0xFF012C00	# Para uma screen de 320x240 = 12C00
+.eqv	COLLISION.BASE		0xFF000000	# Para uma screen de 320x240 = 12C00
 
 .eqv	SCREEN.ADRESS.INIT	0xFF000000
 .eqv	SCREEN.ADRESS.END	0xFF012C00	#320*240 + FF00_0000 modificar caso mude dimesnsoes
@@ -299,6 +305,8 @@ PIECE.ARRAY.T.STATE4:	.word	0,0,1,0,
 # Limites coincidem com as bordas pretas do background
 .eqv	FIELD.SUP.LIM		0xFF003C00	# FF000000 + 320 * 48 -> 12 unidades(unity square) abaixo da parte de cima da tela
 .eqv	FIELD.INF.LIM		0xFF00F000	# FF012C00 - 320 * 16 -> 4 unidades(unity square) acima da parte de baixo da tela
+#.eqv	COL.FIELD.SUP.LIM	0xFF001400	# FF012C00 + 320 * 16
+#.eqv	COL.FIELD.INF.LIM	0xFF012C00	# FF012C00 + 320 * 240
 .eqv	COL.FIELD.SUP.LIM	0xFF014000	# FF012C00 + 320 * 16
 .eqv	COL.FIELD.INF.LIM	0xFF025800	# FF012C00 + 320 * 240
 
@@ -317,13 +325,21 @@ PIECE.ARRAY.T.STATE4:	.word	0,0,1,0,
 .eqv	COLOR.BLACK		0x00000000 	# necessario manter bits a mais ao inves de 0x00
 
 .text
+main.initial:
 	jal	draw.initial.screen
 	jal	choose.player.count
+	#Clean screen
+	jal	clean.screen
 	jal	initiate.game
+	
+	
 main:
+	jal	check.finish
+	bne	$v0, $zero, finish.game	
+	
+
 	la	$a0, PLAYER1.TIMER.COUNT
 	jal	update.p
-	jal	update.p.points
 	
 	#Checar se temos apenas 1 player
 	la	$t0, PLAYER.COUNT	
@@ -376,11 +392,6 @@ initiate.game:
 	lw	$a0, 0($a0)
 	jal	draw.lat.col
 	
-	#Clean screen
-	li $v0,48
-	li $a0,0xFF
-	syscall
-	
 	jal 	draw.background
 	
 	lw	$ra, 4($sp)
@@ -415,7 +426,7 @@ update.p:# (a0 = PLAYERX.TIMER.COUNT) Mapeamento em relacao
 	update.p.rand:
 	li 	$v0, 42  
 	li 	$a1, 6 
-	syscall     
+	#syscall     
 	add	$a0, $a0, 1
 	#Debug
 	add	$a0, $zero ,2
@@ -456,6 +467,7 @@ update.p:# (a0 = PLAYERX.TIMER.COUNT) Mapeamento em relacao
 	#####
 	##########################################################################################
 	# Jogamos pivo para t0
+
 	addi	$t0, $s4, 28 			# PLAYER1.CURRENT.PIVO
 	lw	$t0, 0($t0)			# Endereco do pivo 
 	
@@ -471,7 +483,9 @@ update.p:# (a0 = PLAYERX.TIMER.COUNT) Mapeamento em relacao
 	
 	#Acrscenta movimento para baixo em $t0
 	add 	$t1, $zero, SQUARE.UNIT.SIZE
-	mul	$t1, $t1, SCREEN.X
+	addi	$t2, $zero, SCREEN.X
+	mult	$t1, $t2
+	mflo	$t1
 	add	$t0, $t0, $t1			# t0 = proxima posicao
 	
 	#salvamos possicao passada e array passado
@@ -615,15 +629,18 @@ update.p:# (a0 = PLAYERX.TIMER.COUNT) Mapeamento em relacao
 	sw	$t1, 0($t0)			# PLAYER1.LOST.FLAG
 	update.p.not.lost:
 	
-	#permitimos criacao de nova peca
+	# permitimos criacao de nova peca
 	addi	$t0, $s4, 8 			# PLAYER1.NEWPIECE.FLAG
 	addi	$t1, $zero , 1
 	sw	$t1, 0($t0)		
 	
-	#e permitimos que peca seja desenhada novamente
+	# e permitimos que peca seja desenhada novamente
 	addi	$t0, $s4, 12			# PLAYER1.DRAW.FLAG		
 	addi	$t1, $zero, 1			 
 	sw	$t1, 0($t0)			# PLAYER1.DRAW.FLAG		
+	
+	# Atualizar pontuacao
+	jal	update.p.points
 	
 	update.p.end:
 	lw	$ra, 0($sp)
@@ -637,7 +654,7 @@ draw.piece:#(a0 = pivo, a1 = color, $a2 = endereco inicial do array)
 	addi 	$sp, $sp, -28
 	sw	$t0, 0($sp)
 	sw	$t1, 4($sp)
-	sw	$t2, 8($sp)
+	sw	$t2, 8($sp) 
 	sw	$t3, 12($sp)
 	sw	$t4, 16($sp)
 	sw	$t5, 20($sp)
@@ -716,7 +733,8 @@ draw.unit.square:#(a0 = square pivot, a1 = draw color)
 	div	$t1, $s0, 2				# t1 = SQUARE.UNIT.SIZE/2
 	sub	$t0, $a0, $t1				# pivot - SQUARE.UNIT.SIZE/2				
 	
-	mul	$t1, $s1, $t1				# SCREEN.X * SQUARE.UNIT.SIZE/2
+	mult	$t1, $s1				# SCREEN.X * SQUARE.UNIT.SIZE/2
+	mflo	$t1
 	sub	$t0, $t0, $t1		 		# t0 = canto superior esquerdo
 	
 	#Loop para percorrer quadrado e desenhar
@@ -974,11 +992,12 @@ draw.lat.col:#(a0 = PLAYER.INIT.FIELD.PIVO)
 	# para calcular coluna a direita basta adicionar FIELD.WIDTH + 1 * SQUARE.UNIT.SIZE
 	addi	$t2, $zero, FIELD.WIDTH
 	addi	$t2, $t2, 1
-	mul	$t1, $t2, $t1		# (FIELD.WIDTH + 1) * SQUARE.UNIT.SIZE
+	mult	$t1, $t2		# (FIELD.WIDTH + 1) * SQUARE.UNIT.SIZE
+	mflo	$t1
 	add	$t1, $t0, $t1		# endereco coluna a esquerda + (FIELD.WIDTH + 1) * SQUARE.UNIT.SIZE
 	
 	# Faremos um loop para desenhar ate limite inferior da matriz de colisao
-	addi	$t2, $zero, COL.FIELD.INF.LIM
+	addi	$t2, $zero, SCREEN.ADRESS.END
 	
 	draw.lat.col.lp1:
 		slt	$t3, $t0, $t2				# enquanto t0, for menor que limite inferior da matriz de colisao
@@ -991,7 +1010,8 @@ draw.lat.col:#(a0 = PLAYER.INIT.FIELD.PIVO)
 		# Adicionamos para proximo pivo abaixo
 		addi	$t3, $zero, SQUARE.UNIT.SIZE
 		addi	$t4, $zero, SCREEN.X
-		mul	$t3, $t4, $t3
+		mult	$t3, $t4
+		mflo	$t3
 		
 		add	$t0, $t0 ,$t3
 		add	$t1, $t1 ,$t3
@@ -1031,7 +1051,8 @@ check.row:#(a0 = pivo da peca, a1 = pivo do inicio do campo) $v1 = pontuacao
 	mflo	$t0				# ter modificado estado do tabuleiro) e multiplicamos por 320
 	addi	$t0, $t0, SQUARE.UNIT.SIZE
 	addi	$t0, $t0, SQUARE.UNIT.SIZE
-	mul	$t0, $t0, $t1			# Temos em t0 distancia em relacao a a1
+	mult	$t0, $t1			# Temos em t0 distancia em relacao a a1
+	mflo	$t0
 	
 	add	$t0, $t0, $a1			# t0 = ponto inicial da verificao na tela
 	
@@ -1059,21 +1080,27 @@ check.row:#(a0 = pivo da peca, a1 = pivo do inicio do campo) $v1 = pontuacao
 		addi	$t3, $zero, FIELD.WIDTH		# quantidade de quadrado para verificar na linha
 		add	$t4, $zero, $s1			# Ponto inicial da verificacao
 		#debug
-		add	$t6, $zero, $s0
+		#add	$t6, $zero, $s0
 		
 		check.row.lp2:
 			beq	$t2, $t3 ,check.row.clean.row	# caso loop chegue aqui linha esta preenchida
 			
+			#Checamos se a checagem nao ultrapassa os limites do campo
+			addi	$t6, $zero, FIELD.INF.LIM
+			slt	$t6, $t6, $t4			# caso estejamos alem do FIEL.INF.LIM
+			bne	$t6, $zero, check.row.lp2.end	# se nao for zero entao t4 > t6
+			
 			lb	$t5, 0($t4)
 			#debug
-			sb	$zero, 0($t6)
+			#sb	$zero, 0($t6)
 			
-			beq	$t5, $zero, check.row.lp2.end	# caso nao esteja preenchido entao linha nao esta preenchida 
-			
+			addi	$t6, $zero, 0xFFFFFFFF		# Caso esteja preenchido com cor branca
+			beq	$t5, $t6, check.row.lp2.end
+			#beq	$t5, $zero, check.row.lp2.end	# caso nao esteja preenchido entao linha nao esta preenchida 
 			addi	$t4, $t4, SQUARE.UNIT.SIZE 			# Verificamos proximo quadrado
 			
 			#debug
-			addi	$t6, $t6, SQUARE.UNIT.SIZE
+			#addi	$t6, $t6, SQUARE.UNIT.SIZE
 			
 			addi	$t2, $t2, 1
 			j	check.row.lp2
@@ -1087,11 +1114,11 @@ check.row:#(a0 = pivo da peca, a1 = pivo do inicio do campo) $v1 = pontuacao
 		addi	$a3, $zero, 0			#nao e matriz de colisao
 		jal	drop.row
 		
-		add	$a0, $zero, $s1
-		addi	$a1, $zero, COL.FIELD.INF.LIM
-		addi	$a2, $zero, COL.FIELD.SUP.LIM
-		addi	$a3, $zero, 1			# Dropar como matriz de colisao
-		jal	drop.row
+		#add	$a0, $zero, $s1
+		#addi	$a1, $zero, COL.FIELD.INF.LIM
+		#addi	$a2, $zero, COL.FIELD.SUP.LIM
+		#addi	$a3, $zero, 1			# Dropar como matriz de colisao
+		#jal	drop.row
 		
 		addi	$v1, $v1, 1
 		
@@ -1101,7 +1128,8 @@ check.row:#(a0 = pivo da peca, a1 = pivo do inicio do campo) $v1 = pontuacao
 		check.row.lp2.end:
 		addi	$t3, $zero, SQUARE.UNIT.SIZE
 		addi	$t2, $zero, SCREEN.X
-		mul	$t2, $t2, $t3
+		mult	$t2, $t3
+		mflo	$t2
 		sub	$s0, $s0, $t2		# Subtraimos nos pivos para verificar proxima linha acima
 		sub	$s1, $s1, $t2
 		addi	$t0, $t0, 1
@@ -1135,7 +1163,8 @@ drop.row:#(a0 = pivo da primeira peca da linha a ser removida, a1 = FIELD.INF.LI
 	
 	addi	$t0 , $zero, SQUARE.UNIT.SIZE	
 	addi	$t1, $zero, SCREEN.X
-	mul	$t0, $t0, $t1
+	mult	$t0, $t1
+	mflo	$t0
 	add	$a2, $a2, $t0
 	
 	# Queremos subir para a unidade acima
@@ -1148,7 +1177,8 @@ drop.row:#(a0 = pivo da primeira peca da linha a ser removida, a1 = FIELD.INF.LI
 	
 	# Multitplicamos pelo tamanho da tela para chegar a primeira linha da unidade acima
 	addi	$t1, $zero, SCREEN.X
-	mul	$t0, $t0, $t1
+	mult	$t0, $t1
+	mflo	$t0
 	
 	# Para entao pegar endereco do ponto inicial de onde iremos abaixar
 	sub	$t0, $a0, $t0
@@ -1160,7 +1190,8 @@ drop.row:#(a0 = pivo da primeira peca da linha a ser removida, a1 = FIELD.INF.LI
 	add	$t1, $zero, $a2			# Limite superior
 	addi	$t2, $zero, SQUARE.UNIT.SIZE
 	addi	$t3, $zero, SCREEN.X
-	mul 	$t2, $t2, $t3
+	mult 	$t2, $t3
+	mflo	$t2
 	sub	$t1, $t1, $t2			
 	
 	drop.row.lp1:
@@ -1170,7 +1201,8 @@ drop.row:#(a0 = pivo da primeira peca da linha a ser removida, a1 = FIELD.INF.LI
 		addi	$t2, $zero, SQUARE.UNIT.SIZE
 		addi	$t3, $zero, FIELD.WIDTH
 		
-		mul	$t3, $t2, $t3		# t3 = quantos pixels serao movidos da linha
+		mult	$t3, $t2		# t3 = quantos pixels serao movidos da linha
+		mflo	$t3
 		addi	$t2, $zero, 0		# indice j
 		add	$t4, $zero, $t0		# t4 = endereco atual sendo abaixado
 		
@@ -1180,7 +1212,8 @@ drop.row:#(a0 = pivo da primeira peca da linha a ser removida, a1 = FIELD.INF.LI
 			# Calculamos destino unidade*scree.x + t4
 			addi	$t5, $zero, SQUARE.UNIT.SIZE
 			addi	$t6, $zero, SCREEN.X
-			mul 	$t5, $t5, $t6
+			mult 	$t5, $t6
+			mflo	$t5
 			
 			# t5 = destino
 			add	$t5, $t5, $t4
@@ -1276,10 +1309,10 @@ get.key:#(a0 = PLAYER.KEY.ROTATE)
 	addi 	$sp, $sp, -8
 	sw	$t0, 0($sp)
 	sw	$t1, 4($sp)
-	
-	la 	$t0, TECLADO
-	lw 	$t0 ,0($t0)
-	lw	$t0, 0($t0)
+		
+	la 	$t0, IRDA.READ
+	lw 	$t1 ,0($t0)
+	lw	$t0, 0($t1)
 	
 	get.key.witch:
 		get.key.rotate:
@@ -1312,7 +1345,7 @@ get.key:#(a0 = PLAYER.KEY.ROTATE)
 	
 	get.key.clean:
 	#limpamos endereço do teclado
-	lw 	$t0, TECLADO
+	lw 	$t0, IRDA.READ
 	sw 	$zero , 0($t0)
 	
 	get.key.no.clean:
@@ -1444,6 +1477,7 @@ choose.player.count:
 	choose.player.get.key:
 	add	$a0, $zero, $t0
 	jal	draw.marker
+	
 	la	$a0, PLAYER1.KEY.ROTATE
 	jal	get.key
 	
@@ -1486,6 +1520,7 @@ choose.player.count:
 			j	choose.player.get.key
 	
 	choose.player.end:
+	
 	# Armazenamos contagem de players
 	la	$t1, PLAYER.COUNT
 	sw	$t0, 0($t1)
@@ -1505,7 +1540,7 @@ draw.marker:#(a0 = PLAYER selecionado 1..4)
 	sw	$t1, 8($sp)
 	sw	$t2, 12($sp)
 	sw	$t3, 16($sp)
-	lw	$t4, 20($sp)
+	sw	$t4, 20($sp)
 	sw	$t5, 24($sp)
 	sw	$t6, 28($sp)
 	
@@ -1538,6 +1573,7 @@ draw.marker:#(a0 = PLAYER selecionado 1..4)
 		add	$t3, $zero, $t5
 	
 	draw.marker.at:
+	
 	# Strings com marcadores de players
 	la 	$a0, STRING.SELECT 
 	li 	$a1, 117 
@@ -1574,13 +1610,110 @@ draw.marker:#(a0 = PLAYER selecionado 1..4)
 	addi	$sp, $sp, 32
 	
 	jr $ra 
+
+finish.game:
+	#reinicia valores dos jogadores q necessitam reinicializar
+	la	$t0, PLAYER1.LOST.FLAG
+	la	$t1, PLAYER2.LOST.FLAG
+	la	$t2, PLAYER3.LOST.FLAG
+	la	$t3, PLAYER4.LOST.FLAG
 	
+	sw	$zero, 0($t0)
+	sw	$zero, 0($t1)
+	sw	$zero, 0($t2)
+	sw	$zero, 0($t3)
+	
+	addi	$v0, $zero, 32
+	addi	$a0, $zero, 3000
+	syscall 
+	
+	j	main.initial
+
+#(v0 = 1 , finalizar jogo)
+check.finish:
+	addi	$sp, $sp, -28
+	sw	$ra, 0($sp)
+	sw	$t0, 4($sp)
+	sw	$t1, 8($sp)
+	sw	$t2, 12($sp)
+	sw	$t3, 16($sp)
+	sw	$t4, 20($sp)
+	sw	$t5, 24($sp)
+	
+	la	$t0, PLAYER1.LOST.FLAG
+	lw	$t0,0($t0)
+	la	$t1, PLAYER2.LOST.FLAG
+	lw	$t1,0($t1)
+	la	$t2, PLAYER3.LOST.FLAG
+	lw	$t2,0($t2)
+	la	$t3, PLAYER4.LOST.FLAG
+	lw	$t3,0($t3)
+	
+	la	$t4, PLAYER.COUNT
+	lw	$t4, 0($t4)
+	
+	addi	$t5, $zero, 1
+	beq	$t5, $t4, check.finish.val1
+	addi	$t5, $zero, 2
+	beq	$t5, $t4, check.finish.val2
+	addi	$t5, $zero, 3
+	beq	$t5, $t4, check.finish.val3
+	addi	$t5, $zero, 4
+	beq	$t5, $t4, check.finish.val4
+	
+	check.finish.val1:
+		addi	$v0, $zero, 0
+		beq	$t0, $zero, check.finish.end
+		addi	$v0, $zero, 1
+		j	check.finish.end
+		
+	check.finish.val2:
+		addi	$v0, $zero, 0
+		beq	$t0, $zero, check.finish.end
+		beq	$t1, $zero, check.finish.end
+		addi	$v0, $zero, 1
+		j	check.finish.end
+	
+	check.finish.val3:
+		addi	$v0, $zero, 0
+		beq	$t0, $zero, check.finish.end
+		beq	$t1, $zero, check.finish.end
+		beq	$t2, $zero, check.finish.end
+		addi	$v0, $zero, 1
+		j	check.finish.end
+	
+	check.finish.val4:
+		addi	$v0, $zero, 0
+		beq	$t0, $zero, check.finish.end
+		beq	$t1, $zero, check.finish.end
+		beq	$t2, $zero, check.finish.end
+		beq	$t3, $zero, check.finish.end
+		addi	$v0, $zero, 1
+		j	check.finish.end
+	
+	check.finish.end:
+	
+	lw	$ra, 0($sp)
+	lw	$t0, 4($sp)
+	lw	$t1, 8($sp)
+	lw	$t2, 12($sp)
+	lw	$t3, 16($sp)
+	lw	$t4, 20($sp)
+	lw	$t5, 24($sp)
+	addi	$sp, $sp, 28
+	
+	jr 	$ra
+	
+
+
 #Screen com opcoes e background
 draw.initial.screen:
 	addi	$sp, $sp, -4
 	sw	$ra, 0($sp)
 	
 	# Desenhar background
+	la	$a0, MENU.BACKGROUND
+	jal	draw.bgfigure
 	
 	# Strings com opcoes de players
 	la 	$a0, STRING.PLAYER1 
@@ -1617,6 +1750,42 @@ print.string:#(a0 = STRING, a1 = COLUNA, a2 = LINHA, a3 = COLOR)
 	syscall
 	
 	jr	$ra 
+
+draw.bgfigure:#(a0 = adress image)
+    addi $sp, $sp, -28
+    sw $t0, 0($sp)
+    sw $t1, 4($sp)
+    sw $t2, 8($sp)
+    sw $t3, 12($sp)
+    sw $t4, 16($sp)
+    sw $t5, 22($sp)
+    sw $t6, 24($sp)
+    
+    addi $t0, $0, SCREEN.ADRESS.INIT
+    addi $t1, $0, SCREEN.ADRESS.END
+    add  $t2, $0, $t0 # Inicia Contador
+    addu $t5, $a0, $zero # Posição memoria da figura
+
+    loop_draw_bgfig:
+    	sltu  $t9,$t1,$t2  # Verifica se chegou no final
+    	bne $t9, $0, fim_draw_bgfig   # Acabou de printar figura
+    	lw $t6, 0($t5)      # Le word, da figura
+    	sw $t6, 0($t2)      # Grava word, na VGA
+    	addiu $t2, $t2, 4   # Desloca Contador, onde $t2 é posição da memoria na VGA
+    	addiu $t5, $t5, 4   # Desloca leitura da figura
+    	j loop_draw_bgfig
+    fim_draw_bgfig:
+
+    lw $t0, 0($sp)
+    lw $t1, 4($sp)
+    lw $t2, 8($sp)
+    lw $t3, 12($sp)
+    lw $t4, 16($sp)
+    lw $t5, 22($sp)
+    lw $t6, 24($sp)
+    addi $sp, $sp, 28
+
+    jr  $ra
 
 draw.background:
 	#salvar registradores usados
@@ -1930,6 +2099,28 @@ rotate.piece:#(a0 = endereco do array a ser rotacionado, a1 = piece type adress,
 	
 	jr	$ra
 
+clean.screen:
+	addi 	$sp, $sp, -16
+	sw	$t0, 0($sp)
+	sw	$t1, 4($sp)
+	sw	$t2, 8($sp)
+	sw	$t3, 12($sp)
+	
+	addi	$t0, $zero, SCREEN.ADRESS.INIT
+	addi	$t1, $zero, SCREEN.ADRESS.END
+	addi	$t2, $zero, COLOR.WHITE
+	
+	clean.screen.loop1:
+		slt	$t3, $t0, $t1
+		beq	$t3, $zero, clean.screen.loop1.end 
+		
+		sw	$t2, 0($t0) 
+		
+		addi	$t0, $t0, 4
+		j	clean.screen.loop1
+	clean.screen.loop1.end:
+
+	jr	$ra
 
 copy.array:#(a0 = endereco para qual sera copiado, a1 = endereco do que sera copiado)	a0 = a1
 	addi 	$sp, $sp, -16
