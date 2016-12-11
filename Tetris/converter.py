@@ -44,7 +44,7 @@ def main(argv):
             tmpVectorLine[i] = ', 0x'.join([str(item) for item in tmpLine])
 
     # Glue Everything together using map
-    newVectorLine = '.byte:'+''.join(map(str, tmpVectorLine))[1:]+'\r\n'
+    newVectorLine = '.byte '+''.join(map(str, tmpVectorLine))[1:]+'\r\n'
 
     # Make a new file
     mNewFile = open(outputfile,'w')
