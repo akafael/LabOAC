@@ -40,15 +40,17 @@ PLAYER1.PAST.FORM:	.word	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0	# 108
 
 PLAYER1.SCORE:		.word	0 #172
 	
-#PLAYER1.KEY.ROTATE:	.word	0xEA155E87	 # 176
-#PLAYER1.KEY.DOWN:	.word	0xF30C5E87	
-#PLAYER1.KEY.RIGHT:	.word	0xE31C5E87	
-#PLAYER1.KEY.LEFT:	.word	0xE41B5e87	
+#PLAYER1.KEY.ROTATE:	.word	0xEA155E87 # 176
+#PLAYER1.KEY.DOWN:	.word	0xF30C5E87 # 180	
+#PLAYER1.KEY.RIGHT:	.word	0xE31C5E87 # 184
+#PLAYER1.KEY.LEFT:	.word	0xE41B5e87 # 188
 
-PLAYER1.KEY.ROTATE:	.word	0x77
-PLAYER1.KEY.DOWN:	.word	0x73
+PLAYER1.KEY.ROTATE:	.word	0x77	#176
+PLAYER1.KEY.DOWN:	.word	0x73	
 PLAYER1.KEY.RIGHT:	.word	0x64
 PLAYER1.KEY.LEFT:	.word	0x61
+
+PLAYER1.COLOR:		.word	0 # 192
 
 ####
 #PLAYER 2
@@ -80,6 +82,8 @@ PLAYER2.KEY.DOWN:	.word	0x79	#0xAAFFFFFF
 PLAYER2.KEY.RIGHT:	.word	0x69	#0xAAFFFFFF
 PLAYER2.KEY.LEFT:	.word	0x69	#0xAAFFFFFF
 
+PLAYER2.COLOR:		.word	0 # 192
+
 ####
 #PLAYER 3
 ####
@@ -110,6 +114,8 @@ PLAYER3.KEY.DOWN:	.word	0x79	#0xAAFFFFFF
 PLAYER3.KEY.RIGHT:	.word	0x69	#0xAAFFFFFF
 PLAYER3.KEY.LEFT:	.word	0x69	#0xAAFFFFFF
 
+PLAYER3.COLOR:		.word	0 # 192
+
 ####
 #PLAYER 4
 ####
@@ -139,7 +145,9 @@ PLAYER4.KEY.ROTATE:	.word	0x79	#0xAAFFFFFF # 176
 PLAYER4.KEY.DOWN:	.word	0x79	#0xAAFFFFFF
 PLAYER4.KEY.RIGHT:	.word	0x69	#0xAAFFFFFF
 PLAYER4.KEY.LEFT:	.word	0x69	#0xAAFFFFFF
-									
+		
+PLAYER4.COLOR:		.word	0 # 192
+																							
 ########################################################################
 
 #Contem endereços relativos ao quadrado pivo = (2,3) modificar caso mude tamanho das pecas
@@ -375,12 +383,14 @@ main:
 	j	main
 	
 initiate.game:
-	addi 	$sp, $sp, -4
-	sw	$ra, 4($sp)
+	addi 	$sp, $sp, -8
+	sw	$ra, 0($sp)
+	sw	$t0, 4($sp)
 	
 	la	$a0, GAME.BACKGROUND
 	jal	draw.bgfigure
 	
+	#Inicializa colisoes laterais 
 	la	$a0, PLAYER1.INIT.FIELD.PIVO
 	lw	$a0, 0($a0)
 	jal	draw.lat.col
@@ -397,11 +407,30 @@ initiate.game:
 	lw	$a0, 0($a0)
 	jal	draw.lat.col
 	
+	#inicializa cores dos players
+	la	$a0, PLAYER1.COLOR
+	addi	$t0, $zero, COLOR.RED
+	sw	$t0, 0($a0)
+	
+	la	$a0, PLAYER2.COLOR
+	addi	$t0, $zero, COLOR.BLUE
+	sw	$t0, 0($a0)
+	
+	la	$a0, PLAYER3.COLOR
+	addi	$t0, $zero, COLOR.GREEN
+	sw	$t0, 0($a0)
+	
+	la	$a0, PLAYER4.COLOR
+	addi	$t0, $zero, COLOR.BLACK
+	sw	$t0, 0($a0)
+	
+	
 	#jal 	draw.background
 	jal	update.p.points
 	
-	lw	$ra, 4($sp)
-	addi 	$sp, $sp, 4
+	lw	$ra, 0($sp)
+	lw	$t0, 4($sp)
+	addi 	$sp, $sp, 8
 	
 	jr	$ra
 
@@ -432,10 +461,10 @@ update.p:# (a0 = PLAYERX.TIMER.COUNT) Mapeamento em relacao
 	update.p.rand:
 	li 	$v0, 42  
 	li 	$a1, 6 
-	#syscall     
+	syscall     
 	add	$a0, $a0, 1
 	#Debug
-	add	$a0, $zero ,2
+	#add	$a0, $zero ,2
 	
 	addi	$t0, $s4, 36		# PLAYER1.CURRENT.TYPE
 	addi	$t1, $s4, 40		# PLAYER1.CURRENT.STATE
@@ -479,7 +508,8 @@ update.p:# (a0 = PLAYERX.TIMER.COUNT) Mapeamento em relacao
 	
 	#desenhamos peca
 	add	$a0, $zero, $t0			# Endereco do pivo 
-	add	$a1, $zero, COLOR.RED		# Cor para desenhar
+	add	$a1, $s4, 192			# PLAYER.COLOR
+	lw	$a1, 0($a1)			# Cor para desenhar
 	addi	$a2, $s4, 44 			# PLAYER1.PIECE.FORM	# Qual forma sera desenhada
 	jal 	draw.piece
 	
