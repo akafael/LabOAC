@@ -10,8 +10,8 @@ STRING.PLAYER1:		.asciiz	 "PLAYER1"
 STRING.PLAYER2:		.asciiz	 "PLAYER2"
 STRING.PLAYER3:		.asciiz	 "PLAYER3"
 STRING.PLAYER4:		.asciiz	 "PLAYER4"
-STRING.POINTS:		.asciiz	 "POINTS"
-STRING.SELECT:		.asciiz	 "->"
+STRING.POINTS:		.asciiz	 "LINES"
+STRING.SELECT:		.asciiz	 ">"
 
 ####
 #PLAYER 1
@@ -56,7 +56,7 @@ PLAYER1.KEY.LEFT:	.word	0x61
 ################################################################################################
 PLAYER2.TIMER.COUNT:	.word 	0 
 #PLAYER2.TIMER.END:	.word 	1000			# Tempo de espera varia com clock
-PLAYER2.TIMER.END:	.word 	10 
+PLAYER2.TIMER.END:	.word 	10
 
 PLAYER2.NEWPIECE.FLAG:	.word   1
 PLAYER2.DRAW.FLAG:	.word   1
@@ -266,6 +266,9 @@ PIECE.ARRAY.T.STATE4:	.word	0,0,1,0,
 MENU.BACKGROUND:	
 .include	"tetrisnes.asm"
 
+GAME.BACKGROUND:
+.include	"TetrisField.asm"
+
 ################
 # Definiçoes
 ################
@@ -336,7 +339,6 @@ main.initial:
 main:
 	jal	check.finish
 	bne	$v0, $zero, finish.game	
-	
 
 	la	$a0, PLAYER1.TIMER.COUNT
 	jal	update.p
@@ -375,7 +377,10 @@ main:
 initiate.game:
 	addi 	$sp, $sp, -4
 	sw	$ra, 4($sp)
-
+	
+	la	$a0, GAME.BACKGROUND
+	jal	draw.bgfigure
+	
 	la	$a0, PLAYER1.INIT.FIELD.PIVO
 	lw	$a0, 0($a0)
 	jal	draw.lat.col
@@ -392,7 +397,8 @@ initiate.game:
 	lw	$a0, 0($a0)
 	jal	draw.lat.col
 	
-	jal 	draw.background
+	#jal 	draw.background
+	jal	update.p.points
 	
 	lw	$ra, 4($sp)
 	addi 	$sp, $sp, 4
@@ -638,9 +644,6 @@ update.p:# (a0 = PLAYERX.TIMER.COUNT) Mapeamento em relacao
 	addi	$t0, $s4, 12			# PLAYER1.DRAW.FLAG		
 	addi	$t1, $zero, 1			 
 	sw	$t1, 0($t0)			# PLAYER1.DRAW.FLAG		
-	
-	# Atualizar pontuacao
-	jal	update.p.points
 	
 	update.p.end:
 	lw	$ra, 0($sp)
@@ -1108,6 +1111,8 @@ check.row:#(a0 = pivo da peca, a1 = pivo do inicio do campo) $v1 = pontuacao
 		check.row.clean.row:
 		# Nao acrescentamos para proxima linha pois esta ja tera descido
 		
+		jal	update.p.points
+		
 		add	$a0, $zero, $s0
 		addi	$a1, $zero, FIELD.INF.LIM
 		addi	$a2, $zero, FIELD.SUP.LIM
@@ -1358,8 +1363,13 @@ get.key:#(a0 = PLAYER.KEY.ROTATE)
 
 
 update.p.points:
-	addi 	$sp, $sp, -4
+	addi 	$sp, $sp, -24
 	sw	$ra, 0($sp)
+	sw	$a0, 4($sp)
+	sw	$a1, 8($sp)
+	sw	$a2, 12($sp)
+	sw	$t0, 16($sp)
+	sw	$t1, 20($sp)
 	
 	######
 	#PLAYER 1
@@ -1420,15 +1430,25 @@ update.p.points:
 	
 	update.p.points.end:
 	lw	$ra, 0($sp)
-	addi 	$sp, $sp, 4
+	lw	$a0, 4($sp)
+	lw	$a1, 8($sp)
+	lw	$a2, 12($sp)
+	lw	$t0, 16($sp)
+	lw	$t1, 20($sp)
+	addi 	$sp, $sp, 24
 	
 	jr 	$ra
 
 print.status:#(a0 = endereco string STRING.PLAYER , a1 = endereco pontuacao PLAYER.SCORE, a2 = coluna para plotar)
-	addi	$sp, $sp, -12
+	addi	$sp, $sp, -32
 	sw	$s0, 0($sp)
 	sw	$s1, 4($sp)
 	sw	$s2, 8($sp)
+	sw	$v0,12($sp)
+	sw	$a0,16($sp)
+	sw	$a1,20($sp)
+	sw	$a2,24($sp)
+	sw	$a3,28($sp)
 	
 	add	$s0, $zero, $a0
 	add	$s1, $zero, $a1
@@ -1437,14 +1457,14 @@ print.status:#(a0 = endereco string STRING.PLAYER , a1 = endereco pontuacao PLAY
 	addi 	$v0,$zero, 104 	#4
 	add 	$a0, $zero, $s0
 	add 	$a1, $zero, $s2
-	li 	$a2,16
+	li 	$a2,13
 	li 	$a3,0x00FF
 	syscall
 	
 	addi 	$v0,$zero, 104 #4
 	la 	$a0, STRING.POINTS
 	add 	$a1, $zero, $s2
-	li 	$a2,24
+	li 	$a2,22
 	li 	$a3,0x00FF
 	syscall
 	
@@ -1453,14 +1473,19 @@ print.status:#(a0 = endereco string STRING.PLAYER , a1 = endereco pontuacao PLAY
 	lw	$a0, 0($a0)
 	add 	$a1, $zero, $s2
 	addi	$a1, $a1, 48
-	li 	$a2,24
+	li 	$a2,22
 	li 	$a3,0x00FF
 	syscall
 	
 	lw	$s0, 0($sp)
 	lw	$s1, 4($sp)
 	lw	$s2, 8($sp)
-	addi	$sp, $sp, 12
+	lw	$v0,12($sp)
+	lw	$a0,16($sp)
+	lw	$a1,20($sp)
+	lw	$a2,24($sp)
+	lw	$a3,28($sp)
+	addi	$sp, $sp, 32
 	
 	jr	$ra
 
